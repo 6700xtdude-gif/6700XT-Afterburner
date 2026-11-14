@@ -42,7 +42,23 @@ To solve [Issue #1](https://github.com/6700xtdude-gif/6700XT-Afterburner/issues/
 | **Healed 18L (`Q4_0`, BI + Distillation, $K=3$)** | **1.71** | **88.5% (JSON) / 63.4% (Code)** | **96.7 t/s (JSON) / 77.3 t/s (Code)** | **1.35x (+34.9% Peak Record!)** |
 | **Healed 18L (`Q4_0`, BI + Distillation, $K=4$)** | **1.71** | **89.2% (mean burst = 4.54 tok)** | **95.4 t/s (JSON)** | **1.33x (+33.1%)** |
 
-### 3. Cross-Generation Tokenizer Barrier (Qwen 2.5 vs. Qwen 3.5/3.6)
+### 3. Scaling Up to 14B in 100% VRAM (**1.71x Speedup — 14B Running at 7B Speeds!**)
+Because speculative decoding amortizes target weight reads across multiple drafted tokens, the speedup ratio scales even higher on larger dense models that still fit inside the RX 6700 XT's 12 GB VRAM (`Qwen2.5-Coder-14B-Instruct-Q4_K_M`, 8.37 GiB + 0.28 GiB drafter = ~9.45 GiB total via [`tools/benchmark_14b_vram.py`](tools/benchmark_14b_vram.py)):
+
+| 14B Full-VRAM Configuration (RX 6700 XT 12 GB) | Structured JSON Speed ($\alpha$) | Python Code Speed ($\alpha$) | Speedup vs. Standalone 14B |
+| :--- | :---: | :---: | :---: |
+| **Standalone 14B (`Q4_K_M`, 48L, 8.37 GiB)** | 37.4 t/s (—) | 37.5 t/s (—) | Baseline (1.00x) |
+| **14B + Healed 18L 0.5B Draft ($K=3$)** | **63.0 t/s (86.7%)** | **51.2 t/s (62.9%)** | **1.68x (JSON) / 1.37x (Code)** |
+| **14B + Healed 18L 0.5B Draft ($K=4$)** | **63.9 t/s (89.2%)** | 47.3 t/s (58.9%) | **1.71x (+70.9% JSON Record!)** |
+| **14B + Unpruned 24L 0.5B Draft ($K=3$)** | 62.3 t/s (88.5%) | **60.9 t/s (85.0%)** | **1.67x (JSON) / 1.62x (+62.4% Code!)** |
+
+### 4. Dory-Style Latent-Recurrent Layer Looping inside the 96 MB Infinity Cache
+Inspired by NVIDIA's **Dory1.0-4B** looped transformer, [`scripts/test_looped_draft.py`](scripts/test_looped_draft.py) converts our 14-layer (<90 MB `Q2_0`) Infinity Cache architecture into a **19-effective-layer Looped Transformer** by looping the 5 middle layers (`5..9`) twice with a 3.5 KB gated anchor re-injection (`loop_alpha` + `loop_norm`):
+* **Unhealed Linear 14L (14 Passes):** `52.87%` Teacher Agreement (`KL = 273.56`)
+* **Distilled Linear 14L (14 Passes):** `94.43%` Teacher Agreement (`KL = 8.35`) — **Hits `99.8 t/s` (`1.39x`) on 7B JSON and `64.6 t/s` (`1.73x`) on 14B JSON!**
+* **Distilled Dory-Looped 14L (19 Effective Passes, Same 14L Physical Weights):** **`95.30%` Teacher Agreement (`KL = 6.78`, -18.8% lower KL divergence)** — **Lifts 7B Python Code acceptance from `49.3%` (`67.9 t/s`) to `56.4%` (`70.9 t/s`, +7.1% acceptance) using the exact same 14 physical layers!**
+
+### 5. Cross-Generation Tokenizer Barrier (Qwen 2.5 vs. Qwen 3.5/3.6)
 When pairing `Qwen3.6-35B-A3B` (248k `qwen35` vocabulary) with `Qwen2.5-0.5B` (152k `qwen2` vocabulary), stock `llama.cpp` rejects speculation (`common_specu: the target and draft vocabs are not compatible`). Bridging Qwen 2.5 drafters to Qwen 3.6 MoE targets requires runtime token ID remapping via `draft_to_verifier_id.bin`.
 
 ---
