@@ -1,0 +1,35 @@
+# Large Model Weights & Checkpoints (Never commit multi-GB models to Git!)
+Models/
+packs/
+*.gguf
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+
+# Compiled Binaries & Submodules
+bin/
+tools/llama.cpp/
+*.exe
+*.dll
+*.zip
+
+# Python Cache & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Local Workspace & OS Artifacts
+Workspace/
+.DS_Store
+Thumbs.db
+*.log
+
+# Secrets & Environment Files
+.env
+*.key
+mcp_config.json
