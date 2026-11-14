@@ -39,17 +39,19 @@ To solve [Issue #1](https://github.com/6700xtdude-gif/6700XT-Afterburner/issues/
 | :--- | :---: | :---: | :---: | :---: |
 | **Unhealed 14L (`Q2_0`, `[8..17]` cut)** | 269.41 | 0.0% | 17.0 t/s | 0.24x (Failed) |
 | **Unhealed 14L (`Q4_0`, `[8..17]` cut)** | 269.41 | 21.2% | 45.8 t/s | 0.64x (Slowdown) |
-| **Healed 18L (`Q4_0`, BI + Distillation, $K=3$)** | **1.71** | **88.5% (JSON) / 63.4% (Code)** | **96.7 t/s (JSON) / 77.3 t/s (Code)** | **1.35x (+34.9% Peak Record!)** |
-| **Healed 18L (`Q4_0`, BI + Distillation, $K=4$)** | **1.71** | **89.2% (mean burst = 4.54 tok)** | **95.4 t/s (JSON)** | **1.33x (+33.1%)** |
+| **Healed 18L (`Q4_0`, BI + Distillation, $K=3$)** | **1.71** | **88.5% (JSON) / 63.4% (Code)** | **96.7 t/s (JSON) / 77.3 t/s (Code)** | **1.35x (+34.9%)** |
+| **Healed 14L (`Q4_0`, ShortGPT + Distillation, $K=3$)** | **8.35** | **88.5% (JSON) / 49.3% (Code)** | **99.8 t/s (JSON) / 67.9 t/s (Code)** | **1.39x (+39.2% Peak 7B Record!)** |
+| **Dory-Looped 19L (`Q4_0`, 14L Physical -> 19L Pass, $K=3$)** | **6.78** | **85.8% (JSON) / 56.4% (Code, +7.1%!)** | **92.5 t/s (JSON) / 70.9 t/s (Code)** | **1.29x (+29.0%)** |
 
-### 3. Scaling Up to 14B in 100% VRAM (**1.71x Speedup — 14B Running at 7B Speeds!**)
-Because speculative decoding amortizes target weight reads across multiple drafted tokens, the speedup ratio scales even higher on larger dense models that still fit inside the RX 6700 XT's 12 GB VRAM (`Qwen2.5-Coder-14B-Instruct-Q4_K_M`, 8.37 GiB + 0.28 GiB drafter = ~9.45 GiB total via [`tools/benchmark_14b_vram.py`](tools/benchmark_14b_vram.py)):
+### 3. Scaling Up to 14B in 100% VRAM (**1.73x Speedup — 14B Running at 7B Speeds!**)
+Because speculative decoding amortizes target weight reads across multiple drafted tokens, the speedup ratio scales even higher on larger dense models that still fit inside the RX 6700 XT's 12 GB VRAM (`Qwen2.5-Coder-14B-Instruct-Q4_K_M`, 8.37 GiB + 0.24–0.28 GiB drafter = ~9.4 GiB total via [`tools/benchmark_14b_vram.py`](tools/benchmark_14b_vram.py) & [`docs/14B_FULL_VRAM_SPECULATIVE.md`](docs/14B_FULL_VRAM_SPECULATIVE.md)):
 
 | 14B Full-VRAM Configuration (RX 6700 XT 12 GB) | Structured JSON Speed ($\alpha$) | Python Code Speed ($\alpha$) | Speedup vs. Standalone 14B |
 | :--- | :---: | :---: | :---: |
 | **Standalone 14B (`Q4_K_M`, 48L, 8.37 GiB)** | 37.4 t/s (—) | 37.5 t/s (—) | Baseline (1.00x) |
+| **14B + Healed 14L 0.5B Draft ($K=3$)** | **64.6 t/s (86.7%)** | 43.7 t/s (46.5%) | **1.73x (+72.7% Peak 14B Record!)** |
 | **14B + Healed 18L 0.5B Draft ($K=3$)** | **63.0 t/s (86.7%)** | **51.2 t/s (62.9%)** | **1.68x (JSON) / 1.37x (Code)** |
-| **14B + Healed 18L 0.5B Draft ($K=4$)** | **63.9 t/s (89.2%)** | 47.3 t/s (58.9%) | **1.71x (+70.9% JSON Record!)** |
+| **14B + Healed 18L 0.5B Draft ($K=4$)** | **63.9 t/s (89.2%)** | 47.3 t/s (58.9%) | **1.71x (+70.9% JSON)** |
 | **14B + Unpruned 24L 0.5B Draft ($K=3$)** | 62.3 t/s (88.5%) | **60.9 t/s (85.0%)** | **1.67x (JSON) / 1.62x (+62.4% Code!)** |
 
 ### 4. Dory-Style Latent-Recurrent Layer Looping inside the 96 MB Infinity Cache
@@ -70,7 +72,10 @@ When pairing `Qwen3.6-35B-A3B` (248k `qwen35` vocabulary) with `Qwen2.5-0.5B` (1
 * [`tools/llm_bridge_mcp.py`](tools/llm_bridge_mcp.py) — Zero-dependency MCP (Model Context Protocol) server bridging the local RX 6700 XT Vulkan server and OpenRouter into agentic IDEs.
 * [`tools/test_local_tool_calling.py`](tools/test_local_tool_calling.py) — End-to-end agentic tool-calling test harness (autonomous Windows PowerShell execution in <700 ms).
 * [`scripts/vocab_prune.py`](scripts/vocab_prune.py) & [`scripts/layer_prune.py`](scripts/layer_prune.py) — Model surgery scripts for slicing vocabulary and transformer layers to fit inside the 96 MB Infinity Cache.
-* [`MEMORY/`](MEMORY/) — Complete engineering lab notebook ([`EXPERIMENT_LOG.md`](MEMORY/EXPERIMENT_LOG.md), [`LESSONS.md`](MEMORY/LESSONS.md), [`BENCHMARK_RESULTS.json`](MEMORY/BENCHMARK_RESULTS.json)).
+* [`docs/YOUTUBE_SCRIPT.md`](docs/YOUTUBE_SCRIPT.md) — *"CACHE ME IF YOU CAN: Project 6700XT-Afterburner"* full 8-Act YouTube Show script & iteration scoreboard.
+* [`docs/INFINITY_CACHE_HARDWARE_MATRIX.md`](docs/INFINITY_CACHE_HARDWARE_MATRIX.md) — Hardware compatibility & surgical cache-sizing guide for AMD RDNA 2/3/4 (32–128 MB MALL), NVIDIA Ada/Blackwell (32–96 MB L2), AMD Ryzen X3D / EPYC-X (96–1,152 MB 3D V-Cache), and Strix Halo / Apple Silicon SLC.
+* [`docs/DORY_LOOPED_96MB_SURGERY.md`](docs/DORY_LOOPED_96MB_SURGERY.md) — Architectural deep-dive on Dory-style 14L->19L latent-recurrent layer looping & 32k chat distillation.
+* [`MEMORY/`](MEMORY/) — Complete engineering lab notebook ([`EXPERIMENT_LOG.md`](MEMORY/EXPERIMENT_LOG.md), [`LESSONS.md`](MEMORY/LESSONS.md), [`BENCHMARK_RESULTS.json`](MEMORY/BENCHMARK_RESULTS.json), [`BENCHMARK_DORY_MATRIX.json`](MEMORY/BENCHMARK_DORY_MATRIX.json)).
 
 ---
 

@@ -51,3 +51,9 @@ We exported both **`Qwen2.5-Coder-0.5B-L14-Healed`** (`14` physical ShortGPT lay
    * Using the **exact same 14 physical layers** (`KEEP_14`), looping the middle 5 layers (`5..9`) twice in `Dory-Looped 19L` lifts Python Quicksort draft acceptance on 7B from **`49.3%` (`67.9 t/s`) up to `56.4%` (`70.9 t/s`, +7.1% acceptance and +3.0 t/s faster)**, and lifts 14B code acceptance from **`46.5%` to `48.1%`**.
 3. **32,768-Vocab Chat Template Fix (`scripts/distill_32k_dory_and_14l.py`):**
    * Isolated why the original 32k-vocab pruned model failed on chat prompts: `Qwen2.5` encodes `"assistant"` in `<|im_start|>assistant\n` as token ID `77091` (`> 32753`), which was dropped by naive frequency slicing and split into `[395, 11202]`. Distilling the 32k-vocab `Healed 14L` and `Dory-Looped 19L` models directly on 32k-tokenized chat sequences (`94.29%` and `95.16%` teacher agreement) restored clean Python function generation at **`535–681 tokens/sec`** standalone!
+
+---
+
+## 5. Full Iteration Narrative ("Cache Me If You Can" YouTube Script) & Cross-Silicon Matrix
+* 🎬 **[`docs/YOUTUBE_SCRIPT.md`](YOUTUBE_SCRIPT.md):** Complete 8-Act production script & act-by-act iteration scoreboard tracking the evolution from Baseline 7B (`71.7 t/s`) -> Twin-Engine (`95.5 t/s`) -> Issue #1 Lobotomy (`0%` acc) -> PR #2 Healed 18L (`96.7 t/s`) -> PR #3 14B Full-VRAM (`64.6 t/s`, `1.73x`) -> PR #4 Healed 14L (`99.8 t/s` Record) & Dory-Looped 19L (`+7.1%` Code Acceptance).
+* 🧠 **[`docs/INFINITY_CACHE_HARDWARE_MATRIX.md`](INFINITY_CACHE_HARDWARE_MATRIX.md):** Hardware compatibility matrix mapping our 96 MB / 64 MB / 32 MB surgical draft tiers to AMD RDNA 2/3/4 GPUs, NVIDIA Ada/Blackwell "Mega-L2" GPUs (`RTX 4060 Ti / 5060 Ti 16GB`), AMD Ryzen X3D / EPYC-X 3D V-Cache CPUs (`5800X3D / 7800X3D / 9800X3D`), and Unified Memory SoCs (`Ryzen AI Max+ 395 Strix Halo`, Apple Silicon SLC).
