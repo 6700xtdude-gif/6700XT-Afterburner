@@ -1,0 +1,122 @@
+[
+  {
+    "prompt_ts": 197.0,
+    "gen_ts": 37.4,
+    "eval_ms": 3392.3,
+    "acc_rate": null,
+    "accepted": null,
+    "drafted": null,
+    "elapsed_s": 9.68,
+    "config": "Standalone 14B",
+    "category": "Structured JSON",
+    "speedup": 1.0
+  },
+  {
+    "prompt_ts": 195.6,
+    "gen_ts": 63.0,
+    "eval_ms": 2016.12,
+    "acc_rate": 86.667,
+    "accepted": 91,
+    "drafted": 105,
+    "elapsed_s": 8.81,
+    "config": "14B + Healed 18L 0.5B (K=3)",
+    "category": "Structured JSON",
+    "speedup": 1.68
+  },
+  {
+    "prompt_ts": 189.3,
+    "gen_ts": 63.9,
+    "eval_ms": 1988.51,
+    "acc_rate": 89.189,
+    "accepted": 99,
+    "drafted": 111,
+    "elapsed_s": 8.86,
+    "config": "14B + Healed 18L 0.5B (K=4)",
+    "category": "Structured JSON",
+    "speedup": 1.71
+  },
+  {
+    "prompt_ts": 187.7,
+    "gen_ts": 62.3,
+    "eval_ms": 2039.38,
+    "acc_rate": 88.46199999999999,
+    "accepted": 92,
+    "drafted": 104,
+    "elapsed_s": 8.88,
+    "config": "14B + Unpruned 24L 0.5B (K=3)",
+    "category": "Structured JSON",
+    "speedup": 1.67
+  },
+  {
+    "prompt_ts": 187.6,
+    "gen_ts": 62.4,
+    "eval_ms": 2034.58,
+    "acc_rate": 90.0,
+    "accepted": 99,
+    "drafted": 110,
+    "elapsed_s": 8.86,
+    "config": "14B + Unpruned 24L 0.5B (K=4)",
+    "category": "Structured JSON",
+    "speedup": 1.67
+  },
+  {
+    "prompt_ts": 168.9,
+    "gen_ts": 37.5,
+    "eval_ms": 3384.49,
+    "acc_rate": null,
+    "accepted": null,
+    "drafted": null,
+    "elapsed_s": 9.63,
+    "config": "Standalone 14B",
+    "category": "Code Generation",
+    "speedup": 1.0
+  },
+  {
+    "prompt_ts": 169.7,
+    "gen_ts": 51.2,
+    "eval_ms": 2480.28,
+    "acc_rate": 62.879,
+    "accepted": 83,
+    "drafted": 132,
+    "elapsed_s": 9.08,
+    "config": "14B + Healed 18L 0.5B (K=3)",
+    "category": "Code Generation",
+    "speedup": 1.37
+  },
+  {
+    "prompt_ts": 164.2,
+    "gen_ts": 47.3,
+    "eval_ms": 2682.32,
+    "acc_rate": 58.940000000000005,
+    "accepted": 89,
+    "drafted": 151,
+    "elapsed_s": 9.49,
+    "config": "14B + Healed 18L 0.5B (K=4)",
+    "category": "Code Generation",
+    "speedup": 1.26
+  },
+  {
+    "prompt_ts": 163.1,
+    "gen_ts": 60.9,
+    "eval_ms": 2086.93,
+    "acc_rate": 85.047,
+    "accepted": 91,
+    "drafted": 107,
+    "elapsed_s": 8.84,
+    "config": "14B + Unpruned 24L 0.5B (K=3)",
+    "category": "Code Generation",
+    "speedup": 1.62
+  },
+  {
+    "prompt_ts": 163.4,
+    "gen_ts": 55.2,
+    "eval_ms": 2298.79,
+    "acc_rate": 76.613,
+    "accepted": 95,
+    "drafted": 124,
+    "elapsed_s": 9.06,
+    "config": "14B + Unpruned 24L 0.5B (K=4)",
+    "category": "Code Generation",
+    "speedup": 1.47
+  }
+]
