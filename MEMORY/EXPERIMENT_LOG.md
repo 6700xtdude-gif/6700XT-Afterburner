@@ -360,7 +360,7 @@
      - Formulated 4-phase benchmark matrix: 64GB System-Managed vs 64GB Manual Pagefile (96 GB / 192 GB) vs 32GB baseline.
 - **Status:** COMPLETE. Pipeline operational; ready for live baseline execution.
 
-## EXP-022: Pi Coding Agent Harness Integration, Unsandboxed Host Tools & End-to-End Context Consistency
+## EXP-023: Pi Coding Agent Harness Integration, Unsandboxed Host Tools & End-to-End Context Consistency
 - **Date / Time:** 2026-11-14T14:15:00-06:00
 - **Target:** Install, configure, and verify the Pi coding agent harness (`@earendil-works/pi-coding-agent` v1.5.2) against local 6700XT-Afterburner models (`http://127.0.0.1:8080/v1`) with full host tool execution (PowerShell, Bash, web research) and 64k context window.
 - **Key Discoveries & Fixes:**
@@ -378,4 +378,28 @@
      - Integrated `pi-search-hub` and Python `ddgs`, providing keyless DuckDuckGo web search and Jina Reader `web_read`.
      - Audited live session (`01a1dba7`): Verified that host hostname is literally `SANDBOX` (triggering model sandbox hallucination). Confirmed all tools (`powershell`, `bash`, `web_search`) executed natively on host; isolated failure modes to model cmdlet syntax errors and UAC elevation requirements for `slmgr.vbs`.
 - **Status:** COMPLETE, verified, and operational.
+
+## EXP-024: Live 27B-IQ2_M Benchmark Matrix Re-Confirmation & Parity Auditing
+- **Date / Time:** 2026-11-14T14:35:00-06:00
+- **Target:** Resume benchmark pipeline on active Strata / 6700XT-Afterburner server using unified test suite (`bench/bench_head_to_head.py`) and correctness verifier (`bench/correctness/parity_eval.py`).
+- **Execution & Telemetry Findings:**
+  1. **Clean Daemon Relaunch & Hardware Telemetry:**
+     - Relaunched `Qwen3.8-27B-IQ2_M.gguf` on port 8080 with `-ngl 99`, `-t 6`, `-ctk q4_0 -ctv q4_0`, `-c 65536`, and `--spec-type draft-mtp --spec-draft-n-max 2`.
+     - Verified peak process RSS remained strictly bounded between 11.69 GB and 12.62 GB during active generation.
+  2. **Standard Evaluation Matrix Results (`benchmark_20261114_143254.md`):**
+     - Overall Median Decode: **22.43 tokens/sec** (re-confirming ~22.8 t/s theoretical limit).
+     - Structured JSON Agent: **23.70 t/s** (72.8% MTP draft acceptance rate, 870 ms TTFT).
+     - Python Code Generation (LRU Cache): **23.06 t/s** (69.8% MTP draft acceptance rate, 581 ms TTFT).
+     - Technical Reasoning (Autoregressive vs MTP): **21.80 t/s** (63.3% MTP draft acceptance rate, 599 ms TTFT).
+     - Single-Sentence Smoke Test: **21.39 t/s** (60.7% MTP draft acceptance rate, 438 ms TTFT).
+  3. **Correctness & Parity Verification:**
+     - Ran `python bench/correctness/parity_eval.py --target http://127.0.0.1:8080/v1`.
+     - All 4 verification stages passed:
+       - Determinism (temp=0.0): PASSED (Byte-for-byte matching outputs).
+       - JSON Schema & Syntax: PASSED (Well-formed JSON with required monitoring telemetry schema).
+       - Python AST Validation: PASSED (Syntactically valid AST code generated).
+       - Speculative Quality: PASSED (71.5% acceptance over 618 drafted tokens).
+  4. **Clean Session Teardown:**
+     - Terminated background server process and freed port 8080 / GDDR6 VRAM.
+- **Status:** COMPLETE. Verified and recorded.
 

@@ -3,7 +3,8 @@
 ## Active Context & State
 - **GitHub Repository:** https://github.com/6700xtdude-gif/6700XT-Afterburner (`main` branch synced, working tree clean).
 - **Host:** Windows 11 Pro, Ryzen 5 5600 (6C/12T), 64 GB DDR4-3200, AMD Radeon RX 6700 XT 12 GB (`Navi 22` / `gfx1031` Vulkan).
-- **Active Phase:** Production Ready — 100% VRAM Resident 27B Speculative Decoding (`Qwen3.8-27B-IQ2_M` at **22.8 t/s median**), Dual-Engine 7B/14B setups (7B at 95.3 t/s, 14B at 60.9–62.3 t/s), and standardized spec-driven benchmarking (`bench/`) and hermetic testing (`tests/`).
+- **Active Phase:** Production Ready & Verified — 100% VRAM Resident 27B Speculative Decoding (`Qwen3.8-27B-IQ2_M` re-verified at **22.43–22.83 t/s median**), Dual-Engine 7B/14B setups (7B at 95.3 t/s, 14B at 60.9–62.3 t/s), standardized spec-driven benchmarking (`bench/`), and hermetic testing (`tests/`).
+- **Server Status:** All background processes cleanly stopped; port 8080 and 12 GB GDDR6 VRAM free for clean launch.
 
 ## Current Production Stack
 - **Governance Anchor ([`AGENTS.md`](file:///c:/Users/6700XT/Documents/Strata/AGENTS.md)):**
