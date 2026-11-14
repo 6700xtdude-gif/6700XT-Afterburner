@@ -1,8 +1,9 @@
 # 🧠 Infinity Cache, Mega-L2 & 3D V-Cache Hardware Compatibility Matrix
 
-> **Core Principle:** The **6700XT-Afterburner** architecture exploits a universal silicon design pattern in modern GPUs, CPUs, and AI SoCs: **a multi-terabyte-per-second on-die or 3D-stacked SRAM Last-Level Cache (32 MB – 1,152 MB) shielding a narrow off-chip DRAM/GDDR bus.**
-
-By compressing the speculative draft engine into **25 MB – 85 MB** via **ShortGPT Layer Pruning** ([`scripts/profile_layer_importance.py`](../scripts/profile_layer_importance.py)), **Seam Knowledge Distillation** ([`scripts/heal_draft_model.py`](../scripts/heal_draft_model.py)), **Dory-Style Latent-Recurrent Layer Looping** ([`scripts/build_dory_and_14l_healed.py`](../scripts/build_dory_and_14l_healed.py)), and **32k Native Vocabulary Distillation** ([`scripts/distill_32k_dory_and_14l.py`](../scripts/distill_32k_dory_and_14l.py)), draft generation executes at **SRAM cache speeds (>1–3 TB/s)** while the heavy verifier model streams weights across the narrow memory bus only once every $K+1$ tokens.
+> **Core Principle & Hardware Reality Check:** The **6700XT-Afterburner** architecture investigates on-die and 3D-stacked SRAM Last-Level Caches (32 MB – 1,152 MB) shielding off-chip DRAM/GDDR buses.
+>
+> * **Hardware Profiling Caveat:** While compressing draft models below 96 MB allowed standalone generation at 895 t/s on Navi 22, this rate corresponds to ~80.5 GB/s of weight streaming—far below the 384 GB/s of the GDDR6 bus and orders of magnitude below >1 TB/s SRAM. At small batch sizes, decoding latency is dominated by sequential kernel dispatch and sync overhead rather than bandwidth. Asserting true MALL/L3 cache residency requires hardware counter profiling (e.g., AMD RGP or rocprofiler L3 hit rates).
+> * **Production Recommendation:** For production coding and general workloads, use the **Stock Untouched 0.5B (24L)** drafter, which avoids distillation overfit and reliably speeds up 7B by 1.2x–1.33x and 14B by 1.5x–1.7x across unseen held-out tasks. Surgical models (<85 MB) remain documented experimental artifacts.
 
 ---
 

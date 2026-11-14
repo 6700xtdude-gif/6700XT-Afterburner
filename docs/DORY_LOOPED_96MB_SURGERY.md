@@ -41,15 +41,21 @@ We exported both **`Qwen2.5-Coder-0.5B-L14-Healed`** (`14` physical ShortGPT lay
 
 | Target Verifier (100% in VRAM) | Draft Engine (`Q4_0`, $K=3$) | Structured JSON Speed ($\alpha$) | Python Code Speed ($\alpha$) | JSON Speedup vs. Baseline |
 | :--- | :--- | :---: | :---: | :---: |
-| **7B Verifier (`4.36 GiB`)**<br>*(Baseline: 71.7 t/s JSON, 71.4 t/s Code)* | **Healed 14L (`14` Pass)**<br>**Dory-Looped 19L (`14L -> 19` Pass)**<br>Healed 18L (`18` Pass) | **99.8 t/s (88.5%) — NEW RECORD!**<br>92.5 t/s (85.8%)<br>96.1 t/s (88.5%) | 67.9 t/s (49.3%)<br>**70.9 t/s (56.4%, +7.1% Acc!)**<br>**77.2 t/s (63.4%)** | **1.39x (+39.2% Record!)**<br>1.29x (+29.0%)<br>1.34x (+34.0%) |
-| **14B Verifier (`8.37 GiB`)**<br>*(Baseline: 37.4 t/s JSON, 37.5 t/s Code)* | **Healed 14L (`14` Pass)**<br>**Dory-Looped 19L (`14L -> 19` Pass)**<br>Healed 18L (`18` Pass) | **64.6 t/s (86.7%) — NEW RECORD!**<br>60.4 t/s (81.1%)<br>62.8 t/s (86.7%) | 43.7 t/s (46.5%)<br>**43.0 t/s (48.1%, +1.6% Acc!)**<br>**51.0 t/s (62.9%)** | **1.73x (+72.7% Record!)**<br>1.61x (+61.5%)<br>1.68x (+67.9%) |
+| **7B Verifier (`4.36 GiB`)**<br>*(Baseline: 71.7 t/s JSON, 71.4 t/s Code)* | **Healed 14L (`14` Pass)**<br>**Dory-Looped 19L (`14L -> 19` Pass)**<br>Healed 18L (`18` Pass) | **99.8 t/s (88.5%)***<br>92.5 t/s (85.8%)<br>96.1 t/s (88.5%) | 67.9 t/s (49.3%)<br>**70.9 t/s (56.4%)**<br>**77.2 t/s (63.4%)** | **1.39x (+39.2%)***<br>1.29x (+29.0%)<br>1.34x (+34.0%) |
+| **14B Verifier (`8.37 GiB`)**<br>*(Baseline: 37.4 t/s JSON, 37.5 t/s Code)* | **Healed 14L (`14` Pass)**<br>**Dory-Looped 19L (`14L -> 19` Pass)**<br>Healed 18L (`18` Pass) | **64.6 t/s (86.7%)***<br>60.4 t/s (81.1%)<br>62.8 t/s (86.7%) | 43.7 t/s (46.5%)<br>**43.0 t/s (48.1%)**<br>**51.0 t/s (62.9%)** | **1.73x (+72.7%)***<br>1.61x (+61.5%)<br>1.68x (+67.9%) |
 
-### Key Takeaways from Silicon Verification:
-1. **`Healed 14L` Sets All-Time Throughput Records on Structured JSON (`99.8 t/s` on 7B, `64.6 t/s` on 14B):**
-   * Because `Healed 14L` is 22% shallower than `18L` (`14` vs. `18` layers) while matching its `88.5%` (7B) and `86.7%` (14B) JSON acceptance rate after ShortGPT + Seam Distillation, it drafts tokens faster and pushes 7B speculative throughput to **`99.8 tokens/sec` (`1.39x` speedup)** and 14B throughput to **`64.6 tokens/sec` (`1.73x` speedup)**!
-2. **`Dory-Looped 19L` Proves Layer Looping Adds Coding Circuit Depth (`+7.1%` Acceptance on 7B Code):**
-   * Using the **exact same 14 physical layers** (`KEEP_14`), looping the middle 5 layers (`5..9`) twice in `Dory-Looped 19L` lifts Python Quicksort draft acceptance on 7B from **`49.3%` (`67.9 t/s`) up to `56.4%` (`70.9 t/s`, +7.1% acceptance and +3.0 t/s faster)**, and lifts 14B code acceptance from **`46.5%` to `48.1%`**.
-3. **32,768-Vocab Chat Template Fix (`scripts/distill_32k_dory_and_14l.py`):**
+*(Asterisk indicates results on prompts matching the 4-paragraph calibration corpus. Differences like 95.5 vs 96.7 t/s on N=128 tokens are within run-to-run noise of $\pm 1.5$ t/s).*
+
+### Scientific Audit & Key Findings from Silicon Verification:
+1. **Calibration Overfitting on `Healed 14L` and `Dory-Looped 19L`:**
+   * The headline numbers (`99.8 t/s` on 7B, `64.6 t/s` on 14B) reflect drafters tested on prompts identical or adjacent to their 4-paragraph calibration corpus.
+   * On **held-out unseen prompts** ([`tools/verify_blind_heldout.py`](../tools/verify_blind_heldout.py)), `Healed 14L` acceptance collapsed to **34.2%** and `Dory-Looped 19L` to **32.1%** (dropping to 34.7–37.0 t/s, below standalone 14B baseline).
+   * Meanwhile, the **Stock Untouched 24L 0.5B drafter** maintained **74.4%–85.6% acceptance (55.0–56.6 t/s)** across unseen workloads.
+2. **Single-Prompt Limitation of Dory Looping Gain:**
+   * The +7.1% acceptance lift (49.3% -> 56.4%) was observed on a **single Python Quicksort prompt**. When tested across diverse held-out prompts, layer looping did not rescue the representation loss of 10 cut layers.
+3. **Hardware Overhead Bounds vs. Cache Residency:**
+   * The 14L model runs at ~895 t/s standalone, which corresponds to ~80.5 GB/s of weight streaming—far below the 384 GB/s of the GDDR6 bus, let alone >1 TB/s on-die SRAM. Inference at this scale is kernel-launch and dispatch overhead-bound. L3 cache residency cannot be confirmed without dedicated hardware performance counter profiling.
+4. **32,768-Vocab Chat Template Fix (`scripts/distill_32k_dory_and_14l.py`):**
    * Isolated why the original 32k-vocab pruned model failed on chat prompts: `Qwen2.5` encodes `"assistant"` in `<|im_start|>assistant\n` as token ID `77091` (`> 32753`), which was dropped by naive frequency slicing and split into `[395, 11202]`. Distilling the 32k-vocab `Healed 14L` and `Dory-Looped 19L` models directly on 32k-tokenized chat sequences (`94.29%` and `95.16%` teacher agreement) restored clean Python function generation at **`535–681 tokens/sec`** standalone!
 
 ---

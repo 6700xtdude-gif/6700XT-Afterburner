@@ -1,87 +1,108 @@
 # 6700XT-Afterburner 🚀
 
-**Dual-Engine Speculative Decoding & 96 MB Infinity Cache Model Surgery for the AMD Radeon RX 6700 XT (`Navi 22` / `gfx1031` Vulkan)**
+**Dual-Engine Speculative Decoding & Hardware Reality Audit for the AMD Radeon RX 6700 XT (`Navi 22` / `gfx1031` Vulkan)**
 
-> **Core Mission:** Overcome the 192-bit GDDR6 memory bus bottleneck (~384 GB/s) on the 12 GB AMD Radeon RX 6700 XT by pairing a 100% VRAM-resident **Qwen 2.5 Coder 7B (`Q4_K_M`)** verifier with an ultra-fast **0.5B (`Q4_0`)** draft engine—and exploring sub-90 MB L3-resident model surgery inside Navi 22's **96 MB Infinity Cache** (>1 TB/s SRAM).
+> **Core Mission:** Overcome the 192-bit GDDR6 memory bus bottleneck (~384 GB/s) on the 12 GB AMD Radeon RX 6700 XT by pairing a 100% VRAM-resident **Qwen 2.5 Coder 7B (`Q4_K_M`)** verifier with an ultra-fast **0.5B (`Q4_0`)** stock draft engine—and auditing sub-90 MB L3-resident model surgery inside Navi 22's **96 MB Infinity Cache** (>1 TB/s SRAM) as a rigorous negative result.
 
 ---
 
 ## 📊 Empirical Benchmark Results (RX 6700 XT 12 GB — Vulkan Backend)
 
-All benchmarks were executed via [tools/benchmark_speculative_suite.py](tools/benchmark_speculative_suite.py) at deterministic temperature (`--temp 0.0`, `-fa on`, `-ngl 99 -ngld 99`) over $N = 128$ generated tokens (`llama.cpp` build `b12374` Vulkan). Raw JSON results are available in [MEMORY/BENCHMARK_RESULTS.json](MEMORY/BENCHMARK_RESULTS.json).
+All benchmarks were executed via [`tools/benchmark_speculative_suite.py`](tools/benchmark_speculative_suite.py) at deterministic temperature (`--temp 0.0`, `-fa on`, `-ngl 99 -ngld 99`, `-c 2048`, $N = 128$ generated tokens, `llama.cpp` build `b12374` Vulkan). 
 
-| Workload Category | Mode / Config | Generation Speed | Latency (128 Tok) | Draft Acceptance ($\alpha$) | Speedup vs Baseline |
+> [!NOTE]
+> **Multi-Run Variance & Warmup Methodology:** To guard against single-trial noise, all metrics report **3 timed trials following 1 untimed warmup run**. Mean throughput is reported with empirical spread `[min, max]`. Differences of $\le 1.5\text{--}2.0\text{ t/s}$ on $N=128$ tokens fall within run-to-run variance on Windows WDDM. Raw multi-run JSON results are available in [`MEMORY/BENCHMARK_RESULTS.json`](MEMORY/BENCHMARK_RESULTS.json).
+
+| Workload Category | Mode / Config | Generation Speed (Mean & Spread) | Latency (128 Tok) | Draft Acceptance ($\alpha$) | Speedup vs Baseline |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **Structured JSON / Schema**<br>*(Tool calls, schemas, JSON)* | **Baseline Standalone 7B**<br>Speculative ($K=2$)<br>Speculative ($K=3$)<br>Speculative ($K=4$) | 71.7 t/s<br>**95.5 t/s**<br>**92.9 t/s**<br>**93.8 t/s** | 1,771.8 ms<br>**1,330.2 ms**<br>**1,366.9 ms**<br>**1,354.6 ms** | —<br>**94.3%**<br>**89.3%**<br>**92.6%** | Baseline (1.00x)<br>**1.33x (+33.2%)**<br>**1.30x (+29.6%)**<br>**1.31x (+30.8%)** |
-| **Code Generation**<br>*(Python Quicksort algorithm)* | **Baseline Standalone 7B**<br>Speculative ($K=2$)<br>Speculative ($K=3$)<br>Speculative ($K=4$) | 71.4 t/s<br>**83.8 t/s**<br>**85.8 t/s**<br>73.8 t/s | 1,779.6 ms<br>**1,516.1 ms**<br>**1,480.7 ms**<br>1,720.9 ms | —<br>**77.0%**<br>**78.8%**<br>66.7% | Baseline (1.00x)<br>**1.17x (+17.4%)**<br>**1.20x (+20.2%)**<br>1.03x (+3.4%) |
-| **Technical Reasoning**<br>*(Freeform system architecture)* | **Baseline Standalone 7B**<br>Speculative ($K=2$)<br>Speculative ($K=3$)<br>Speculative ($K=4$) | 71.5 t/s<br>**73.8 t/s**<br>67.9 t/s<br>61.5 t/s | 1,776.3 ms<br>**1,721.6 ms**<br>1,869.8 ms<br>2,063.4 ms | —<br>**61.9%**<br>55.6%<br>51.8% | Baseline (1.00x)<br>**1.03x (+3.2%)**<br>0.95x (-5.0%)<br>0.86x (-14.0%) |
+| **Structured JSON / Schema**<br>*(Tool calls, schemas, JSON)* | **Baseline Standalone 7B**<br>Speculative ($K=2$)<br>Speculative ($K=3$)<br>Speculative ($K=4$) | 71.9 t/s `[71.8, 71.9]`<br>**95.3 t/s `[94.9, 95.6]`**<br>**92.9 t/s `[92.1, 93.4]`**<br>**93.8 t/s `[93.0, 94.2]`** | 1,771.8 ms<br>**1,330.2 ms**<br>**1,366.9 ms**<br>**1,354.6 ms** | —<br>**94.3%**<br>**89.3%**<br>**92.6%** | Baseline (1.00x)<br>**1.33x (+32.5%)**<br>**1.29x (+29.2%)**<br>**1.30x (+30.5%)** |
+| **Code Generation**<br>*(Python Quicksort algorithm)* | **Baseline Standalone 7B**<br>Speculative ($K=2$)<br>Speculative ($K=3$)<br>Speculative ($K=4$) | 72.0 t/s `[71.9, 72.0]`<br>**84.5 t/s `[84.4, 84.6]`**<br>**85.3 t/s `[85.0, 85.5]`**<br>73.8 t/s `[73.1, 74.2]` | 1,779.6 ms<br>**1,516.1 ms**<br>**1,480.7 ms**<br>1,720.9 ms | —<br>**77.0%**<br>**78.8%**<br>66.7% | Baseline (1.00x)<br>**1.17x (+17.4%)**<br>**1.18x (+18.5%)**<br>1.03x (+2.5%) |
+| **Technical Reasoning**<br>*(Freeform system architecture)* | **Baseline Standalone 7B**<br>Speculative ($K=2$)<br>Speculative ($K=3$)<br>Speculative ($K=4$) | 71.7 t/s `[71.6, 71.8]`<br>**74.7 t/s `[74.6, 74.8]`**<br>67.9 t/s `[67.2, 68.3]`<br>61.5 t/s `[60.8, 62.1]` | 1,776.3 ms<br>**1,721.6 ms**<br>1,869.8 ms<br>2,063.4 ms | —<br>**61.9%**<br>55.6%<br>51.8% | Baseline (1.00x)<br>**1.04x (+4.2%)**<br>0.95x (-5.3%)<br>0.86x (-14.2%) |
 
 ---
 
 ## 🔬 Key Hardware & Architecture Findings
 
-### 1. Why Speculative Decoding Works on the 192-bit Bus
-Autoregressive LLM generation (`batch_size = 1`) is strictly memory-bandwidth bound. Every single token requires streaming ~4.68 GB of 7B weights across the RX 6700 XT's 192-bit GDDR6 bus (~384 GB/s), capping standalone generation around **71.5 tokens/sec**.
+### 1. Why Stock Speculative Decoding Succeeds on the 192-bit Bus
+Autoregressive LLM decoding (`batch_size = 1`) is strictly memory-bandwidth bound. Every single token generated requires streaming ~4.68 GB of 7B weights across the RX 6700 XT's 192-bit GDDR6 bus (~384 GB/s), capping standalone generation around **71.7 tokens/sec**.
 
-By running `Qwen2.5-Coder-0.5B-Instruct-Q4_0` (330 MB) alongside `Qwen2.5-Coder-7B-Instruct-Q4_K_M` (4.68 GB)—consuming just **~5.2 GB of 12 GB VRAM combined**—the 0.5B model rapidly drafts $K = 2\text{--}3$ tokens, and the 7B model verifies all of them in a **single parallel forward pass** (1 weight read instead of 3–4).
-* **Result:** Up to **95.5 tokens/sec (+33.2%)** on JSON/tool-calling and **85.8 tokens/sec (+20.2%)** on Python code, with **100% mathematically identical output** to standalone 7B.
+By running **stock, untouched `Qwen2.5-Coder-0.5B-Instruct-Q4_0` (330 MB, 24L)** alongside `Qwen2.5-Coder-7B-Instruct-Q4_K_M` (4.68 GB)—consuming just **~5.2 GB of 12 GB VRAM combined**—the 0.5B model drafts $K = 2\text{--}3$ tokens rapidly, and the 7B model verifies them in a single batched forward pass (1 target weight read instead of 3–4).
+* **Speedup:** Achieves **95.3 t/s (+32.5%)** on JSON and **85.3 t/s (+18.5%)** on Python code with zero model surgery required.
+* **Deterministic Fidelity:** Output is **identical at temp 0 in testing** to standalone 7B. *(Note: While speculative verification guarantees greedy algorithmic equivalence, batched GEMM floating-point accumulation order can introduce minute numerical differences in non-deterministic or different batching regimes).*
 
-### 2. Healing the Surgery: ShortGPT Profiling + Knowledge Distillation (**96.7 tokens/sec Record!**)
-Initially, zero-shot layer pruning (`24 -> 14` layers, blindly dropping `[8..17]` in `Q2_0`) achieved **895.4 tokens/sec** standalone inside the **96 MB Infinity Cache**, but suffered `0%` speculative acceptance (`21.2%` in `Q4_0`) because cutting `blk.16` (`BI = 0.0941`) shifted output logits away from the 7B verifier (`KL = 269.41`).
+---
 
-To solve [Issue #1](https://github.com/6700xtdude-gif/6700XT-Afterburner/issues/1), we built a two-part surgical healing pipeline:
-1. **Neural Layer Importance Profiler ([`scripts/profile_layer_importance.py`](scripts/profile_layer_importance.py)):**
-   * Measured ShortGPT Block Influence (`1 - cos_sim(X_in, X_out)`) and Leave-One-Out token agreement across all 24 layers, identifying `[9, 10, 11, 12, 13, 18]` as the true low-influence redundant valley (`24 -> 18` layers, `-25%` depth).
-2. **Seam Knowledge Distillation Healer ([`scripts/heal_draft_model.py`](scripts/heal_draft_model.py)):**
-   * Tuned the seam projections (`o_proj`, `down_proj`, `LayerNorm`) using Top-128 Logit KL-Divergence + Hidden-State Cosine Alignment against the 24-layer Teacher, lifting teacher token agreement from **`38.94%` (naive 14L) -> `73.22%` (unhealed 18L) -> `97.82%` (healed 18L, `KL = 1.71`)**!
+### 2. Model Surgery & Layer Pruning: A Documented Negative Result
+Initially, zero-shot layer pruning (`24L -> 14L`, dropping layers `[8..17]`) was attempted to compress the drafter into Navi 22's **96 MB Infinity Cache** (<90 MB in `Q2_0`). While this pruned model generated tokens at 895 t/s standalone, it produced disastrous speculative performance (`0%` acceptance in `Q2_0`, `21.2%` in `Q4_0`) due to severe logit drift (`KL = 269.41`).
 
-| Draft Engine Surgery State | Teacher KL Div | Speculative Acceptance ($\alpha$) | RX 6700 XT Speed (JSON / Code) | vs. Standalone 7B (`71.7 t/s`) |
-| :--- | :---: | :---: | :---: | :---: |
-| **Unhealed 14L (`Q2_0`, `[8..17]` cut)** | 269.41 | 0.0% | 17.0 t/s | 0.24x (Failed) |
-| **Unhealed 14L (`Q4_0`, `[8..17]` cut)** | 269.41 | 21.2% | 45.8 t/s | 0.64x (Slowdown) |
-| **Healed 18L (`Q4_0`, BI + Distillation, $K=3$)** | **1.71** | **88.5% (JSON) / 63.4% (Code)** | **96.7 t/s (JSON) / 77.3 t/s (Code)** | **1.35x (+34.9%)** |
-| **Healed 14L (`Q4_0`, ShortGPT + Distillation, $K=3$)** | **8.35** | **88.5% (JSON) / 49.3% (Code)** | **99.8 t/s (JSON) / 67.9 t/s (Code)** | **1.39x (+39.2% Peak 7B Record!)** |
-| **Dory-Looped 19L (`Q4_0`, 14L Physical -> 19L Pass, $K=3$)** | **6.78** | **85.8% (JSON) / 56.4% (Code, +7.1%!)** | **92.5 t/s (JSON) / 70.9 t/s (Code)** | **1.29x (+29.0%)** |
+To investigate whether layer surgery could be rehabilitated, we applied ShortGPT Block Influence profiling ([`scripts/profile_layer_importance.py`](scripts/profile_layer_importance.py)) and seam knowledge distillation ([`scripts/heal_draft_model.py`](scripts/heal_draft_model.py)) on a 4-paragraph calibration corpus. While this restored alignment on matching calibration prompts, **systematic generalization testing revealed this to be a negative result**:
 
-### 3. Scaling Up to 14B in 100% VRAM (**1.73x Speedup — 14B Running at 7B Speeds!**)
-Because speculative decoding amortizes target weight reads across multiple drafted tokens, the speedup ratio scales even higher on larger dense models that still fit inside the RX 6700 XT's 12 GB VRAM (`Qwen2.5-Coder-14B-Instruct-Q4_K_M`, 8.37 GiB + 0.24–0.28 GiB drafter = ~9.4 GiB total via [`tools/benchmark_14b_vram.py`](tools/benchmark_14b_vram.py) & [`docs/14B_FULL_VRAM_SPECULATIVE.md`](docs/14B_FULL_VRAM_SPECULATIVE.md)):
+> [!WARNING]
+> **Audit Finding — Calibration Overfitting on Pruned Drafters ([`tools/verify_blind_heldout.py`](tools/verify_blind_heldout.py)):**
+> * **Distillation Overfit:** Pruned drafters (`Healed 14L` and `Dory-Looped 19L`) achieved synthetic high throughput (**99.8 t/s** on 7B, **64.6 t/s** on 14B) **only** on prompts matching their 4-paragraph calibration corpus. 
+> * **Generalization Collapse:** When evaluated on **held-out unseen prompts** (e.g., thread-safe LRU cache, Dijkstra, PostgreSQL CTEs), draft acceptance collapsed to **34.2%** on `Healed 14L` and **32.1%** on `Dory 19L`, resulting in throughput (**34.7–37.0 t/s**) that **failed to beat standalone 14B baseline (37.4 t/s)**.
+> * **Stock Drafter Superiority:** The unpruned, stock 24-layer `0.5B` drafter generalized robustly across all unseen domains, maintaining **74.4%–85.6% acceptance (55.0–56.6 t/s, 1.51x speedup)** without any fine-tuning.
 
-| 14B Full-VRAM Configuration (RX 6700 XT 12 GB) | Structured JSON Speed ($\alpha$) | Python Code Speed ($\alpha$) | Speedup vs. Standalone 14B |
-| :--- | :---: | :---: | :---: |
-| **Standalone 14B (`Q4_K_M`, 48L, 8.37 GiB)** | 37.4 t/s (—) | 37.5 t/s (—) | Baseline (1.00x) |
-| **14B + Healed 14L 0.5B Draft ($K=3$)** | **64.6 t/s (86.7%)** | 43.7 t/s (46.5%) | **1.73x (+72.7% Peak 14B Record!)** |
-| **14B + Healed 18L 0.5B Draft ($K=3$)** | **63.0 t/s (86.7%)** | **51.2 t/s (62.9%)** | **1.68x (JSON) / 1.37x (Code)** |
-| **14B + Healed 18L 0.5B Draft ($K=4$)** | **63.9 t/s (89.2%)** | 47.3 t/s (58.9%) | **1.71x (+70.9% JSON)** |
-| **14B + Unpruned 24L 0.5B Draft ($K=3$)** | 62.3 t/s (88.5%) | **60.9 t/s (85.0%)** | **1.67x (JSON) / 1.62x (+62.4% Code!)** |
+#### Calibration Prompt Matrix (Single-Prompt Calibration Results vs. Unseen Generalization):
 
-### 4. Dory-Style Latent-Recurrent Layer Looping inside the 96 MB Infinity Cache
-Inspired by NVIDIA's **Dory1.0-4B** looped transformer, [`scripts/test_looped_draft.py`](scripts/test_looped_draft.py) converts our 14-layer (<90 MB `Q2_0`) Infinity Cache architecture into a **19-effective-layer Looped Transformer** by looping the 5 middle layers (`5..9`) twice with a 3.5 KB gated anchor re-injection (`loop_alpha` + `loop_norm`):
-* **Unhealed Linear 14L (14 Passes):** `52.87%` Teacher Agreement (`KL = 273.56`)
-* **Distilled Linear 14L (14 Passes):** `94.43%` Teacher Agreement (`KL = 8.35`) — **Hits `99.8 t/s` (`1.39x`) on 7B JSON and `64.6 t/s` (`1.73x`) on 14B JSON!**
-* **Distilled Dory-Looped 14L (19 Effective Passes, Same 14L Physical Weights):** **`95.30%` Teacher Agreement (`KL = 6.78`, -18.8% lower KL divergence)** — **Lifts 7B Python Code acceptance from `49.3%` (`67.9 t/s`) to `56.4%` (`70.9 t/s`, +7.1% acceptance) using the exact same 14 physical layers!**
+| Draft Engine Variant | Calibration Teacher KL | Calibration Acc ($\alpha$) (JSON / Code) | Calibration Speed (JSON / Code) | Held-Out Unseen Acc ($\alpha$) | Held-Out Unseen Speed | Real-World Status |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Stock Untouched 24L (`Q4_0`)** | **0.00** | **88.5% / 78.8%** | **95.3 t/s / 85.3 t/s** | **74.4% – 85.6%** | **55.0 – 56.6 t/s (1.51x)** | **Production Recommended** |
+| **Healed 18L (6L cut, Distilled)** | 1.71 | 88.5% / 63.4% | 96.7 t/s / 77.3 t/s | 57.1% | 48.1 t/s (1.26x) | Degraded Generalization |
+| **Healed 14L (10L cut, Distilled)** | 8.35 | 88.5% / 49.3% | 99.8 t/s / 67.9 t/s | 34.2% | 37.0 t/s (0.99x) | **Failed Negative Result** (Overfit) |
+| **Dory-Looped 19L (10L cut+loop)** | 6.78 | 85.8% / 56.4% | 92.5 t/s / 70.9 t/s | 32.1% | 34.7 t/s (0.93x) | **Failed Negative Result** (Overfit) |
 
-> [!IMPORTANT]
-> **Scientific Audit — Calibration Overfitting vs. Held-Out Unseen Prompts ([`tools/verify_blind_heldout.py`](tools/verify_blind_heldout.py)):**
-> While `Healed 14L` and `Dory-Looped 19L` achieve `99.8 t/s` (7B) and `64.6 t/s` (14B) on prompts matching their 4-paragraph distillation corpus, blind testing on **held-out unseen prompts** (e.g., thread-safe LRU cache) shows that 10-layer cuts overfit to the small calibration set (`34.2%` unseen acceptance). For general-purpose production coding on unseen prompts:
-> * **`14B + Stock Untouched 0.5B (24L)` (`--spec-type ngram-simple,draft-simple -K 6 --spec-draft-p-min 0.70`)** achieves **`56.6 t/s` (`85.6%` acceptance, `1.51x` speedup over `37.4 t/s` standalone 14B)**.
-> * **`14B + Healed 18L (6L cut)`** achieves **`48.1 t/s` (`57.1%` acceptance, `1.26x` speedup)** on unseen code.
+*(Note: Differences like 95.3 vs 96.7 t/s on JSON are within normal run-to-run variance of $\pm 1.5$ t/s and should not be interpreted as performance advantages).*
 
-### 5. Cross-Generation Tokenizer Barrier (Qwen 2.5 vs. Qwen 3.5/3.6)
+---
+
+### 3. Scaling Up to 14B in 100% VRAM (Stock Drafter Dominates Code)
+Because speculative decoding amortizes target weight reads across accepted tokens, speedup ratios scale even higher on larger models that still fit inside the RX 6700 XT's 12 GB VRAM (`Qwen2.5-Coder-14B-Instruct-Q4_K_M`, 8.37 GiB + 0.33 GiB stock drafter = ~9.45 GiB total via [`tools/benchmark_14b_vram.py`](tools/benchmark_14b_vram.py) & [`docs/14B_FULL_VRAM_SPECULATIVE.md`](docs/14B_FULL_VRAM_SPECULATIVE.md)):
+
+| 14B Configuration (RX 6700 XT 12 GB Vulkan) | Structured JSON Speed ($\alpha$) | Python Code Speed ($\alpha$) | Real Speedup vs. Standalone 14B | Generalization Integrity |
+| :--- | :---: | :---: | :---: | :--- |
+| **Standalone 14B (`Q4_K_M`, 48L, 8.37 GiB)** | 37.4 t/s (—) | 37.5 t/s (—) | Baseline (1.00x) | Baseline |
+| **14B + Stock Untouched 24L 0.5B ($K=3$)** | **62.3 t/s (88.5%)** | **60.9 t/s (85.0%)** | **1.67x (JSON) / 1.62x (Code)** | **Superior Generalization** |
+| **14B + Healed 18L 0.5B Draft ($K=3$)** | 63.0 t/s (86.7%) | 51.2 t/s (62.9%) | 1.68x (JSON) / 1.37x (Code) | Moderate Degradation |
+| **14B + Healed 14L 0.5B Draft ($K=3$)** | 64.6 t/s (86.7%)* | 43.7 t/s (46.5%) | 1.73x (JSON)* / 1.17x (Code) | *Overfit to Calibration Prompts |
+
+*On Python code generation, the **stock untouched 24L drafter achieves 60.9 t/s versus only 43.7 t/s for the healed 14L drafter**—a +39.4% advantage for the stock model over the surgical model. Layer surgery does not justify itself in general code workloads.*
+
+---
+
+### 4. Hardware Reality Check: Infinity Cache Residency vs. Execution Overhead
+Initial surgical goals were guided by the hypothesis that fitting a model below Navi 22's **96 MB Infinity Cache** would allow generation at on-die SRAM speeds (>1 TB/s). However, hardware analysis reveals this claim was unsubstantiated:
+
+1. **Bandwidth Discrepancy:** The 14-layer ~90 MB model ran at **895 tokens/sec** standalone. At 90 MB per forward pass, 895 t/s equates to streaming only ~80.5 GB/s of weights. This is **far below the ~4,000 tokens/sec that the 384 GB/s GDDR6 bus would theoretically permit**, and orders of magnitude below the >1,000 GB/s bandwidth of on-die SRAM.
+2. **Overhead Bounds:** At batch size 1 with small parameter counts, inference latency on Vulkan is bounded by **kernel launch overhead, pipeline dispatch, and sequential layer sync latency**, not memory bandwidth. 
+3. **Absence of Cache Hardware Counters:** Actual cache residency inside AMD's MALL (Memory-Attached Last-Level) cache cannot be asserted from generation speed alone; doing so requires hardware performance counter profiling (e.g., via AMD Radeon GPU Profiler / RGP or `rocprofiler` tracking L3 hit/miss rates). 
+
+---
+
+### 5. Dory-Style Looping Generalization Audit
+The attempt to convert the 14-layer physical drafter into a 19-effective-layer drafter via latent-recurrent looping (`[5..9]` looped $2\times$ with a 3.5 KB gated anchor re-injection) showed a modest calibration-prompt acceptance gain (lifting Python Quicksort acceptance from 49.3% to 56.4%, +7.1%).
+
+However, **this gain rested entirely on a single prompt**. When evaluated across diverse held-out tasks (e.g., unseen database queries, concurrency primitives, and algorithmic reasoning in [`tools/verify_blind_heldout.py`](tools/verify_blind_heldout.py)), the Dory-looped model showed no statistically significant generalization benefit over linear 14L (32.1% vs 34.2%), and remained drastically inferior to the stock 24L drafter (74.4%–85.6%).
+
+---
+
+### 6. Cross-Generation Tokenizer Barrier
 When pairing `Qwen3.6-35B-A3B` (248k `qwen35` vocabulary) with `Qwen2.5-0.5B` (152k `qwen2` vocabulary), stock `llama.cpp` rejects speculation (`common_specu: the target and draft vocabs are not compatible`). Bridging Qwen 2.5 drafters to Qwen 3.6 MoE targets requires runtime token ID remapping via `draft_to_verifier_id.bin`.
 
 ---
 
 ## 🛠️ Repository Structure
 
-* [`start_local_server.ps1`](start_local_server.ps1) — Turnkey PowerShell launcher for the RX 6700 XT Vulkan `llama-server` (`-Mode speculative` for 95.5 t/s 7B+0.5B, or `-Mode moe35b` for hybrid 35B-A3B).
-* [`tools/benchmark_speculative_suite.py`](tools/benchmark_speculative_suite.py) — Automated A/B benchmark suite testing standalone vs. speculative horizons ($K \in \{2, 3, 4\}$) across Code, JSON, and Reasoning.
-* [`tools/llm_bridge_mcp.py`](tools/llm_bridge_mcp.py) — Zero-dependency MCP (Model Context Protocol) server bridging the local RX 6700 XT Vulkan server and OpenRouter into agentic IDEs.
-* [`tools/test_local_tool_calling.py`](tools/test_local_tool_calling.py) — End-to-end agentic tool-calling test harness (autonomous Windows PowerShell execution in <700 ms).
-* [`scripts/vocab_prune.py`](scripts/vocab_prune.py) & [`scripts/layer_prune.py`](scripts/layer_prune.py) — Model surgery scripts for slicing vocabulary and transformer layers to fit inside the 96 MB Infinity Cache.
-* [`docs/YOUTUBE_SCRIPT.md`](docs/YOUTUBE_SCRIPT.md) — *"CACHE ME IF YOU CAN: Project 6700XT-Afterburner"* full 8-Act YouTube Show script & iteration scoreboard.
-* [`docs/INFINITY_CACHE_HARDWARE_MATRIX.md`](docs/INFINITY_CACHE_HARDWARE_MATRIX.md) — Hardware compatibility & surgical cache-sizing guide for AMD RDNA 2/3/4 (32–128 MB MALL), NVIDIA Ada/Blackwell (32–96 MB L2), AMD Ryzen X3D / EPYC-X (96–1,152 MB 3D V-Cache), and Strix Halo / Apple Silicon SLC.
-* [`docs/DORY_LOOPED_96MB_SURGERY.md`](docs/DORY_LOOPED_96MB_SURGERY.md) — Architectural deep-dive on Dory-style 14L->19L latent-recurrent layer looping & 32k chat distillation.
-* [`MEMORY/`](MEMORY/) — Complete engineering lab notebook ([`EXPERIMENT_LOG.md`](MEMORY/EXPERIMENT_LOG.md), [`LESSONS.md`](MEMORY/LESSONS.md), [`BENCHMARK_RESULTS.json`](MEMORY/BENCHMARK_RESULTS.json), [`BENCHMARK_DORY_MATRIX.json`](MEMORY/BENCHMARK_DORY_MATRIX.json)).
+* [`start_local_server.ps1`](start_local_server.ps1) — Production PowerShell launcher for the RX 6700 XT Vulkan `llama-server` (`-Mode speculative` for 7B+0.5B, or `-Mode speculative14b` for 14B+0.5B using stock drafter).
+* [`tools/benchmark_speculative_suite.py`](tools/benchmark_speculative_suite.py) — Automated benchmark suite with multi-run variance testing (warmup + 3 runs, mean and min/max spread) across Code, JSON, and Reasoning.
+* [`tools/verify_blind_heldout.py`](tools/verify_blind_heldout.py) — Rigorous blind generalization audit testing stock vs surgical models across unseen held-out tasks.
+* [`tools/llm_bridge_mcp.py`](tools/llm_bridge_mcp.py) — Zero-dependency MCP server bridging local RX 6700 XT Vulkan models into agentic IDEs.
+* [`tools/test_local_tool_calling.py`](tools/test_local_tool_calling.py) — End-to-end agentic tool-calling test harness (PowerShell tool calls executed in <700 ms).
+* [`scripts/vocab_prune.py`](scripts/vocab_prune.py) & [`scripts/layer_prune.py`](scripts/layer_prune.py) — Model surgery scripts for slicing vocabulary and transformer layers (documented negative result).
+* [`docs/14B_FULL_VRAM_SPECULATIVE.md`](docs/14B_FULL_VRAM_SPECULATIVE.md) — 14B full-VRAM empirical guide and Windows WDDM paging cliff analysis.
+* [`docs/DORY_LOOPED_96MB_SURGERY.md`](docs/DORY_LOOPED_96MB_SURGERY.md) — Architecture and negative result audit of Dory-style layer looping.
+* [`docs/INFINITY_CACHE_HARDWARE_MATRIX.md`](docs/INFINITY_CACHE_HARDWARE_MATRIX.md) — Hardware analysis comparing cache bandwidth vs kernel overhead across modern architectures.
+* [`MEMORY/`](MEMORY/) — Complete engineering lab notebook ([`EXPERIMENT_LOG.md`](MEMORY/EXPERIMENT_LOG.md), [`LESSONS.md`](MEMORY/LESSONS.md), [`BENCHMARK_RESULTS.json`](MEMORY/BENCHMARK_RESULTS.json)).
 
 ---
 
@@ -89,16 +110,16 @@ When pairing `Qwen3.6-35B-A3B` (248k `qwen35` vocabulary) with `Qwen2.5-0.5B` (1
 
 1. **Download Official Vulkan `llama.cpp` Binaries:**
    Extract the Windows Vulkan x64 release of `llama.cpp` into `bin/vulkan/`.
-2. **Download Models:**
+2. **Download Verified Stock Models:**
    ```powershell
    python scripts/download_7b_verifier.py
    python scripts/download_base_draft.py
    ```
-3. **Launch the Speculative Vulkan Server:**
+3. **Launch the Verified Dual-Engine Server (Stock Drafter):**
    ```powershell
-   .\start_local_server.ps1 -Mode speculative -K 3
+   .\start_local_server.ps1 -Mode speculative -K 2
    ```
-4. **Run the Benchmark Suite:**
+4. **Run the Multi-Run Benchmark Suite with Variance Reporting:**
    ```powershell
-   python tools/benchmark_speculative_suite.py
+   python tools/benchmark_speculative_suite.py --runs 3 --warmup 1
    ```

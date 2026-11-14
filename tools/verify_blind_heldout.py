@@ -8,6 +8,7 @@ to guard against calibration overfitting.
 import subprocess
 import re
 import json
+import statistics
 
 LLAMA_CLI = r"C:\Users\6700XT\Documents\Strata\bin\vulkan\llama-cli.exe"
 MODEL_14B = r"C:\Users\6700XT\Documents\Strata\Models\Qwen2.5-Coder-14B-Instruct-GGUF\qwen2.5-coder-14b-instruct-q4_k_m.gguf"
@@ -29,9 +30,17 @@ BLIND_PROMPTS = [
         "Unseen SQL + Schema (PostgreSQL E-Commerce)",
         "Write a PostgreSQL query using a CTE and window function to find the top 3 highest-spending customers per country in 2026."
     ),
+    (
+        "Unseen Algorithm (Dijkstra Shortest Path)",
+        "Implement Dijkstra shortest path algorithm in Python using heapq with detailed docstrings and type annotations."
+    ),
+    (
+        "Unseen System Architecture (Worker Thread Pool)",
+        "Design and implement a concurrent worker thread pool in Python using queue.Queue and threading.Thread with graceful shutdown."
+    )
 ]
 
-def run_one(prompt, draft_path=None, k=3, n_predict=128):
+def run_single(prompt, draft_path=None, k=3, n_predict=128):
     cmd = [
         LLAMA_CLI, "-m", MODEL_14B, "-ngl", "99", "-c", "2048", "-n", str(n_predict),
         "--temp", "0.0", "-st", "-fa", "on", "-ctk", "q8_0", "-ctv", "q8_0", "--verbose", "-p", prompt
@@ -48,15 +57,37 @@ def run_one(prompt, draft_path=None, k=3, n_predict=128):
         "drafted": int(m_ac.group(3)) if m_ac else None,
     }
 
+def run_with_variance(prompt, draft_path=None, k=3, n_predict=128, runs=3, warmup=1):
+    for _ in range(warmup):
+        run_single(prompt, draft_path, k, n_predict)
+    
+    trials = []
+    for _ in range(runs):
+        trials.append(run_single(prompt, draft_path, k, n_predict))
+    
+    speeds = [t["gen_ts"] for t in trials if t["gen_ts"] is not None]
+    accs = [t["acc_rate"] for t in trials if t["acc_rate"] is not None]
+
+    mean_speed = round(statistics.mean(speeds), 1) if speeds else None
+    speed_spread = [round(min(speeds), 1), round(max(speeds), 1)] if speeds else None
+    mean_acc = round(statistics.mean(accs), 1) if accs else None
+
+    base = trials[0] if trials else {}
+    base["gen_ts_mean"] = mean_speed
+    base["gen_ts_spread"] = speed_spread
+    base["acc_rate_mean"] = mean_acc
+    return base
+
 def main():
     print("=" * 84)
     print("BLIND HELD-OUT VERIFICATION BENCHMARK (UNSEEN PROMPTS ON 14B VERIFIER)")
+    print("Testing generalization against calibration overfitting across diverse held-out tasks")
     print("=" * 84)
     for title, prompt in BLIND_PROMPTS:
         print(f"\n>>> {title}")
         base_ts = None
         for label, d_path in DRAFTS:
-            res = run_one(prompt, d_path)
+            res = run_single(prompt, d_path)
             if base_ts is None:
                 base_ts = res["gen_ts"]
             spd = round(res["gen_ts"] / base_ts, 2) if (res["gen_ts"] and base_ts) else 1.0
