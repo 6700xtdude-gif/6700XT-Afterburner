@@ -91,6 +91,15 @@ When pairing `Qwen3.6-35B-A3B` (248k `qwen35` vocabulary) with `Qwen2.5-0.5B` (1
 
 ---
 
+### 7. High-Context 27B/35B Inference & Project 9696XT Audit
+Empirical audit of high-context, large-parameter models on the RX 6700 XT 12GB + Ryzen 5 5600:
+* **100% VRAM 27B Saturation:** [`Qwen3.8-27B-IQ2_M`](file:///c:/Users/6700XT/Documents/Strata/Models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-IQ2_M.gguf) with native MTP speculation fits entirely inside 12 GB GDDR6 (65/65 layers on GPU), delivering **`22.61 tokens/sec`** decode (JSON **24.2 t/s**, Code **23.7 t/s**) with 160 ms TTFT.
+* **Sparse MoE Hybrid Offload:** `Qwen3.6-35B-A3B UD-Q4_K_XL` (Alex's model) achieves **`16.78 tokens/sec`** on Vulkan with 115–124 ms TTFT, streaming only ~3.5 GB active parameters/token.
+* **The 2-DIMM Memory Controller Advantage:** On the Ryzen 5 5600, running 2 single-rank DIMMs (1 DPC, 1T command rate) yields **`7.54 tokens/sec`** on dense hybrid offload—a **+23.0% speedup** over 4-DIMM kits (**6.13 t/s**).
+* Full report: [`docs/PROJECT_9696XT_REPORT.md`](docs/PROJECT_9696XT_REPORT.md).
+
+---
+
 ## 🛠️ Repository Structure
 
 * [`start_local_server.ps1`](start_local_server.ps1) — Production PowerShell launcher for the RX 6700 XT Vulkan `llama-server` (`-Mode speculative` for 7B+0.5B, or `-Mode speculative14b` for 14B+0.5B using stock drafter).
