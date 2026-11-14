@@ -1,6 +1,6 @@
 # start_local_server.ps1 - Launch Vulkan Accelerated Local Server for 6700XT-Afterburner
 param(
-    [ValidateSet("speculative", "healed18l", "speculative14b", "moe35b")]
+    [ValidateSet("speculative", "healed18l", "healed14l", "dory19l", "speculative14b", "moe35b")]
     [string]$Mode = "healed18l",
     [int]$K = 3
 )
@@ -8,14 +8,18 @@ param(
 $RootDir = $PSScriptRoot
 $BinDir  = Join-Path $RootDir "bin\vulkan"
 
-if ($Mode -eq "speculative" -or $Mode -eq "healed18l" -or $Mode -eq "speculative14b") {
+if ($Mode -ne "moe35b") {
     $Host.UI.RawUI.WindowTitle = "6700XT-Afterburner: Dual-Engine Speculative Vulkan Server (RX 6700 XT)"
     if ($Mode -eq "speculative14b") {
         $TargetModel = Join-Path $RootDir "Models\Qwen2.5-Coder-14B-Instruct-GGUF\qwen2.5-coder-14b-instruct-q4_k_m.gguf"
         $DraftModel  = Join-Path $RootDir "Models\Qwen2.5-Coder-0.5B-L18-Healed\Qwen2.5-Coder-0.5B-L18-Healed-Q4_0.gguf"
     } else {
         $TargetModel = Join-Path $RootDir "Models\Qwen2.5-Coder-7B-Instruct-GGUF\qwen2.5-coder-7b-instruct-q4_k_m.gguf"
-        if ($Mode -eq "healed18l") {
+        if ($Mode -eq "healed14l") {
+            $DraftModel = Join-Path $RootDir "Models\Qwen2.5-Coder-0.5B-L14-Healed\Qwen2.5-Coder-0.5B-L14-Healed-Q4_0.gguf"
+        } elseif ($Mode -eq "dory19l") {
+            $DraftModel = Join-Path $RootDir "Models\Qwen2.5-Coder-0.5B-Dory19L-Healed\Qwen2.5-Coder-0.5B-Dory19L-Healed-Q4_0.gguf"
+        } elseif ($Mode -eq "healed18l") {
             $DraftModel = Join-Path $RootDir "Models\Qwen2.5-Coder-0.5B-L18-Healed\Qwen2.5-Coder-0.5B-L18-Healed-Q4_0.gguf"
         } else {
             $DraftModel = Join-Path $RootDir "Models\Qwen2.5-Coder-0.5B-Instruct\Qwen2.5-Coder-0.5B-Instruct-Q4_0.gguf"
