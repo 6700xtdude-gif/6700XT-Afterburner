@@ -1,0 +1,491 @@
+[
+  {
+    "name": "A0_served_before_ngl40",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 40 -t 6 --mmproj",
+    "load_s": 8.1,
+    "vram_dedicated_mib": 10911,
+    "vram_shared_mib": 7596,
+    "prompts": {
+      "code": {
+        "tg_tps": 4.02,
+        "pp_tps": 17.63,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need provide code only. Need final only code. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__, __getitem__, __setitem__. Need code only no explanation. Need be careful with lock. Use threading.Lock. LRU: move_to_end on access. Evict oldest when capacity exceeded. Capacity positive? Could handle 0. Thread-safe.\n\nPotential code\n<<>>\n"
+      },
+      "json": {
+        "tg_tps": 4.02,
+        "pp_tps": 35.21,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need maybe Get-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction SilentlyContinue | Sort-Object Length\n<<>>\n"
+      },
+      "reason": {
+        "tg_tps": 3.96,
+        "pp_tps": 16.14,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model parameters (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n"
+      }
+    },
+    "tg_mean": 4.0,
+    "identical_to_B1": {
+      "code": true,
+      "json": true,
+      "reason": true
+    }
+  },
+  {
+    "name": "B1_reclaim_ngl40",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 40 -t 4 -np 1",
+    "load_s": 6.5,
+    "vram_dedicated_mib": 10644,
+    "vram_shared_mib": 6456,
+    "prompts": {
+      "code": {
+        "tg_tps": 4.02,
+        "pp_tps": 13.99,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need provide code only. Need final only code. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__, __getitem__, __setitem__. Need code only no explanation. Need be careful with lock. Use threading.Lock. LRU: move_to_end on access. Evict oldest when capacity exceeded. Capacity positive? Could handle 0. Thread-safe.\n\nPotential code\n<<>>\n"
+      },
+      "json": {
+        "tg_tps": 4.08,
+        "pp_tps": 31.99,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need maybe Get-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction SilentlyContinue | Sort-Object Length\n<<>>\n"
+      },
+      "reason": {
+        "tg_tps": 4.04,
+        "pp_tps": 13.17,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model parameters (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n"
+      }
+    },
+    "tg_mean": 4.05,
+    "identical_to_B1": {
+      "code": true,
+      "json": true,
+      "reason": true
+    }
+  },
+  {
+    "name": "B2_refill_ngl43",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 43 -t 4 -np 1",
+    "load_s": 6.5,
+    "vram_dedicated_mib": 10634,
+    "vram_shared_mib": 6501,
+    "prompts": {
+      "code": {
+        "tg_tps": 4.02,
+        "pp_tps": 14.88,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need provide code only. Need final only code. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__, __getitem__, __setitem__. Need code only no explanation. Need be careful with lock. Use threading.Lock. LRU: move_to_end on access. Evict oldest when capacity exceeded. Capacity positive? If capacity <=0 maybe no storage? Could handle.\n<<>>\n"
+      },
+      "json": {
+        "tg_tps": 4.0,
+        "pp_tps": 33.25,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need maybe Get-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction SilentlyContinue | Sort-Object Length\n<<>>\n"
+      },
+      "reason": {
+        "tg_tps": 3.96,
+        "pp_tps": 13.81,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model parameters (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n"
+      }
+    },
+    "tg_mean": 3.99,
+    "identical_to_B1": {
+      "code": false,
+      "json": true,
+      "reason": true
+    }
+  },
+  {
+    "name": "B3_refill_ngl45",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 45 -t 4 -np 1",
+    "load_s": 6.6,
+    "vram_dedicated_mib": 10875,
+    "vram_shared_mib": 6272,
+    "prompts": {
+      "code": {
+        "tg_tps": 4.06,
+        "pp_tps": 15.38,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need provide code only. Need final only code. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__, __getitem__, __setitem__. Need code only no explanation. Need be careful with lock. LRU: move_to_end on access. Evict oldest when capacity exceeded. Use threading.Lock. Maybe RLock? Lock sufficient if no nested calls. If __set\n<<>>\n"
+      },
+      "json": {
+        "tg_tps": 3.95,
+        "pp_tps": 32.91,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need maybe Get-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction SilentlyContinue | Sort-Object Length\n<<>>\n"
+      },
+      "reason": {
+        "tg_tps": 4.07,
+        "pp_tps": 14.9,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model parameters (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n"
+      }
+    },
+    "tg_mean": 4.03,
+    "identical_to_B1": {
+      "code": false,
+      "json": true,
+      "reason": true
+    }
+  },
+  {
+    "name": "B4_refill_ngl47",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 47 -t 4 -np 1",
+    "load_s": 6.6,
+    "vram_dedicated_mib": 10944,
+    "vram_shared_mib": 6229,
+    "prompts": {
+      "code": {
+        "tg_tps": 4.07,
+        "pp_tps": 15.88,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need provide code only. Need final only code. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__, __getitem__, __setitem__. Need code only no explanation. Need be careful with lock reentrancy? Use threading.Lock not RLock. Avoid nested lock acquisition. Implement methods with with self._lock. For get: if key not in dict return default?\n<<>>\n"
+      },
+      "json": {
+        "tg_tps": 4.03,
+        "pp_tps": 26.42,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need maybe Get-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction SilentlyContinue | Sort-Object Length\n<<>>\n"
+      },
+      "reason": {
+        "tg_tps": 4.07,
+        "pp_tps": 15.18,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model parameters (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n"
+      }
+    },
+    "tg_mean": 4.06,
+    "identical_to_B1": {
+      "code": false,
+      "json": true,
+      "reason": true
+    }
+  },
+  {
+    "name": "C_mtp_ngl47_k2_tb4",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 47 -t 4 -tb 4 -np 1 --spec-type draft-mtp --spec-draft-n-max 2",
+    "load_s": 6.5,
+    "vram_dedicated_mib": 10909,
+    "vram_shared_mib": 7091,
+    "prompts": {
+      "code": {
+        "tg_tps": 4.98,
+        "pp_tps": 14.87,
+        "n": 128,
+        "draft_n": 109,
+        "draft_acc": 71,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need provide code only. Need final only code. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__, __getitem__, __setitem__. Need code only no explanation. Need be careful with lock. LRU: move_to_end on access. Evict oldest when capacity exceeded. Use threading.Lock. Maybe RLock? Lock sufficient if no nested calls. If __set\n<<>>\n",
+        "accept_rate": 0.651
+      },
+      "json": {
+        "tg_tps": 5.72,
+        "pp_tps": 24.37,
+        "n": 128,
+        "draft_n": 94,
+        "draft_acc": 79,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need ensure valid JSON. Command maybe:\nGet-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction Sil\n<<>>\n",
+        "accept_rate": 0.84
+      },
+      "reason": {
+        "tg_tps": 4.82,
+        "pp_tps": 13.42,
+        "n": 128,
+        "draft_n": 113,
+        "draft_acc": 70,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model parameters (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n",
+        "accept_rate": 0.619
+      }
+    },
+    "tg_mean": 5.17,
+    "identical_to_B1": {
+      "code": false,
+      "json": false,
+      "reason": true
+    }
+  },
+  {
+    "name": "C_mtp_ngl47_k2_tb6",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 47 -t 4 -tb 6 -np 1 --spec-type draft-mtp --spec-draft-n-max 2",
+    "load_s": 6.5,
+    "vram_dedicated_mib": 10909,
+    "vram_shared_mib": 7091,
+    "prompts": {
+      "code": {
+        "tg_tps": 5.38,
+        "pp_tps": 17.37,
+        "n": 128,
+        "draft_n": 109,
+        "draft_acc": 71,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need provide code only. Need final only code. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__, __getitem__, __setitem__. Need code only no explanation. Need be careful with lock. LRU: move_to_end on access. Evict oldest when capacity exceeded. Use threading.Lock. Maybe RLock? Lock sufficient if no nested calls. If __set\n<<>>\n",
+        "accept_rate": 0.651
+      },
+      "json": {
+        "tg_tps": 6.23,
+        "pp_tps": 24.41,
+        "n": 128,
+        "draft_n": 94,
+        "draft_acc": 79,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need ensure valid JSON. Command maybe:\nGet-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction Sil\n<<>>\n",
+        "accept_rate": 0.84
+      },
+      "reason": {
+        "tg_tps": 5.14,
+        "pp_tps": 15.94,
+        "n": 128,
+        "draft_n": 113,
+        "draft_acc": 70,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model parameters (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n",
+        "accept_rate": 0.619
+      }
+    },
+    "tg_mean": 5.58,
+    "identical_to_B1": {
+      "code": false,
+      "json": false,
+      "reason": true
+    }
+  },
+  {
+    "name": "C_mtp_ngl47_k2_tb12",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 47 -t 4 -tb 12 -np 1 --spec-type draft-mtp --spec-draft-n-max 2",
+    "load_s": 6.6,
+    "vram_dedicated_mib": 10909,
+    "vram_shared_mib": 7091,
+    "prompts": {
+      "code": {
+        "tg_tps": 5.37,
+        "pp_tps": 18.59,
+        "n": 128,
+        "draft_n": 109,
+        "draft_acc": 71,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need provide code only. Need final only code. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__, __getitem__, __setitem__. Need code only no explanation. Need be careful with lock. LRU: move_to_end on access. Evict oldest when capacity exceeded. Use threading.Lock. Maybe RLock? Lock sufficient if no nested calls. If __set\n<<>>\n",
+        "accept_rate": 0.651
+      },
+      "json": {
+        "tg_tps": 6.4,
+        "pp_tps": 24.67,
+        "n": 128,
+        "draft_n": 94,
+        "draft_acc": 79,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need ensure valid JSON. Command maybe:\nGet-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction Sil\n<<>>\n",
+        "accept_rate": 0.84
+      },
+      "reason": {
+        "tg_tps": 5.42,
+        "pp_tps": 16.81,
+        "n": 128,
+        "draft_n": 113,
+        "draft_acc": 70,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model parameters (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n",
+        "accept_rate": 0.619
+      }
+    },
+    "tg_mean": 5.73,
+    "identical_to_B1": {
+      "code": false,
+      "json": false,
+      "reason": true
+    }
+  },
+  {
+    "name": "C_mtp_ngl47_k3_tb6",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 47 -t 4 -tb 6 -np 1 --spec-type draft-mtp --spec-draft-n-max 3",
+    "load_s": 6.6,
+    "vram_dedicated_mib": 10882,
+    "vram_shared_mib": 7222,
+    "prompts": {
+      "code": {
+        "tg_tps": 4.79,
+        "pp_tps": 17.91,
+        "n": 128,
+        "draft_n": 154,
+        "draft_acc": 74,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need provide code only. Need final only code. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__, __getitem__, __setitem__. Need code only no explanation. Need be careful with lock. LRU: move_to_end on access. Evict oldest when capacity exceeded. Use threading.Lock. Maybe RLock? Lock sufficient if no nested calls. If __set\n<<>>\n",
+        "accept_rate": 0.481
+      },
+      "json": {
+        "tg_tps": 5.0,
+        "pp_tps": 25.45,
+        "n": 128,
+        "draft_n": 122,
+        "draft_acc": 86,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need ensure valid JSON. Command maybe:\nGet-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction Sil\n<<>>\n",
+        "accept_rate": 0.705
+      },
+      "reason": {
+        "tg_tps": 4.63,
+        "pp_tps": 10.03,
+        "n": 128,
+        "draft_n": 150,
+        "draft_acc": 76,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model parameters (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n",
+        "accept_rate": 0.507
+      }
+    },
+    "tg_mean": 4.81,
+    "identical_to_B1": {
+      "code": false,
+      "json": false,
+      "reason": true
+    }
+  },
+  {
+    "name": "C_mtp_ngl47_k3_tb12",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 47 -t 4 -tb 12 -np 1 --spec-type draft-mtp --spec-draft-n-max 3",
+    "load_s": 6.6,
+    "vram_dedicated_mib": 10882,
+    "vram_shared_mib": 7222,
+    "prompts": {
+      "code": {
+        "tg_tps": 5.12,
+        "pp_tps": 19.21,
+        "n": 128,
+        "draft_n": 154,
+        "draft_acc": 74,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need provide code only. Need final only code. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__, __getitem__, __setitem__. Need code only no explanation. Need be careful with lock. LRU: move_to_end on access. Evict oldest when capacity exceeded. Use threading.Lock. Maybe RLock? Lock sufficient if no nested calls. If __set\n<<>>\n",
+        "accept_rate": 0.481
+      },
+      "json": {
+        "tg_tps": 6.51,
+        "pp_tps": 25.64,
+        "n": 128,
+        "draft_n": 122,
+        "draft_acc": 86,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need ensure valid JSON. Command maybe:\nGet-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction Sil\n<<>>\n",
+        "accept_rate": 0.705
+      },
+      "reason": {
+        "tg_tps": 5.25,
+        "pp_tps": 17.93,
+        "n": 128,
+        "draft_n": 150,
+        "draft_acc": 76,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model parameters (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n",
+        "accept_rate": 0.507
+      }
+    },
+    "tg_mean": 5.63,
+    "identical_to_B1": {
+      "code": false,
+      "json": false,
+      "reason": true
+    }
+  },
+  {
+    "name": "C_mtp_ngl47_k1_tb12",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 47 -t 4 -tb 12 -np 1 --spec-type draft-mtp --spec-draft-n-max 1",
+    "load_s": 6.6,
+    "vram_dedicated_mib": 10864,
+    "vram_shared_mib": 7031,
+    "prompts": {
+      "code": {
+        "tg_tps": 5.1,
+        "pp_tps": 21.38,
+        "n": 128,
+        "draft_n": 73,
+        "draft_acc": 54,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need final code only. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__. Code only no explanation. Need maybe type hints. Need ensure lock reentrant? If methods call each other, use RLock? User specified threading.Lock. Could use Lock and avoid nested calls or use RLock? They specifically threading.Lock, so use Lock. If __contains__ calls get\n<<>>\n",
+        "accept_rate": 0.74
+      },
+      "json": {
+        "tg_tps": 4.97,
+        "pp_tps": 20.54,
+        "n": 128,
+        "draft_n": 69,
+        "draft_acc": 58,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need ensure valid JSON. Command maybe: Get-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction Silently\n<<>>\n",
+        "accept_rate": 0.841
+      },
+      "reason": {
+        "tg_tps": 5.83,
+        "pp_tps": 19.94,
+        "n": 128,
+        "draft_n": 70,
+        "draft_acc": 57,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model weights (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n",
+        "accept_rate": 0.814
+      }
+    },
+    "tg_mean": 5.3,
+    "identical_to_B1": {
+      "code": false,
+      "json": false,
+      "reason": false
+    }
+  },
+  {
+    "name": "C_mtp_ngl45_k2_tb12",
+    "args": "-m --host 127.0.0.1 --port 8091 -fa on -ctk q8_0 -ctv q8_0 -c 8192 --load-mode none --fit off -ngl 45 -t 4 -tb 12 -np 1 --spec-type draft-mtp --spec-draft-n-max 2",
+    "load_s": 8.0,
+    "vram_dedicated_mib": 10949,
+    "vram_shared_mib": 7021,
+    "prompts": {
+      "code": {
+        "tg_tps": 5.86,
+        "pp_tps": 19.28,
+        "n": 128,
+        "draft_n": 115,
+        "draft_acc": 69,
+        "text": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock. Code only.\" Need provide code only. Need final only code. Need likely include class. Ensure thread-safe. Use OrderedDict and Lock. Could include __init__, get, put, maybe delete, clear, __len__, __contains__, __getitem__, __setitem__. Need code only no explanation. Need be careful with lock reentrancy? Use threading.Lock not RLock. Methods should not call other methods while holding lock if they acquire lock. Implement internal _get_locked etc. Or use with\n<<>>\n",
+        "accept_rate": 0.6
+      },
+      "json": {
+        "tg_tps": 7.08,
+        "pp_tps": 25.57,
+        "n": 128,
+        "draft_n": 96,
+        "draft_acc": 78,
+        "text": "We need to respond to user: \"Return a JSON object describing a tool call named run_powershell with a command that lists the 5 largest files in C:\\Users. JSON only.\"\n\nNeed output JSON only. Need likely object with name and arguments? \"describing a tool call named run_powershell with a command\" Could be {\"name\":\"run_powershell\",\"arguments\":{\"command\":\"...\"}}. Need command PowerShell lists 5 largest files in C:\\Users. Need ensure valid JSON. Command maybe: Get-ChildItem -Path C:\\Users -File -Recurse -Force -ErrorAction Silently\n<<>>\n",
+        "accept_rate": 0.812
+      },
+      "reason": {
+        "tg_tps": 5.98,
+        "pp_tps": 18.41,
+        "n": 128,
+        "draft_n": 113,
+        "draft_acc": 70,
+        "text": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth bound.\" Need produce final with exactly three short paragraphs. Need explain. Let's craft concise.\n\nKey points: autoregressive decoding generates one token at a time; each step computes logits for next token using model weights and KV cache. At batch size 1, arithmetic intensity low: for each token, read all model parameters (and KV cache) from memory, perform relatively few FLOPs (matrix-vector multiplications rather than matrix-matrix). Memory bandwidth limits because data movement dominates compute; GPU compute units under\n<<>>\n",
+        "accept_rate": 0.619
+      }
+    },
+    "tg_mean": 6.31,
+    "identical_to_B1": {
+      "code": false,
+      "json": false,
+      "reason": true
+    }
+  }
+]

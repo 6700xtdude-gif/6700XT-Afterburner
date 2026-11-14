@@ -1,0 +1,30 @@
+[
+  {
+    "id": "smoke_eval",
+    "category": "smoke",
+    "prompt": "What is the name of this computer? Answer in one short sentence.",
+    "max_tokens": 64,
+    "temperature": 0.0
+  },
+  {
+    "id": "structured_json_agent",
+    "category": "json",
+    "prompt": "You are a system monitoring agent. Output a valid JSON object containing system telemetry with keys: 'hostname', 'os', 'gpu_model', 'vram_total_mb', 'vram_free_mb', 'cu_count', 'engine_status', 'active_models'. Do not write markdown, return only raw JSON.",
+    "max_tokens": 128,
+    "temperature": 0.2
+  },
+  {
+    "id": "code_lru_cache",
+    "category": "code",
+    "prompt": "Write a clean, thread-safe LRU Cache implementation in Python 3.12 using collections.OrderedDict and threading.Lock. Include get, put, and evict methods with type annotations and docstrings.",
+    "max_tokens": 256,
+    "temperature": 0.2
+  },
+  {
+    "id": "reasoning_pipeline",
+    "category": "reasoning",
+    "prompt": "Explain step-by-step why an autoregressive LLM decoding at batch size 1 becomes memory bandwidth bound on modern GPUs, and how speculative decoding (like native MTP draft heads) converts this into a compute-bound operation. Use concrete mathematical formulas for arithmetic intensity.",
+    "max_tokens": 300,
+    "temperature": 0.4
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "name": "RX6700XT_Standard_Eval_Matrix",
+  "endpoint": "http://127.0.0.1:8080/v1",
+  "corpus_file": "bench/corpus/standard_prompts.json",
+  "rounds": 3,
+  "warmup": true,
+  "interleaved": true,
+  "telemetry": {
+    "poll_interval_s": 0.25
+  },
+  "acceptance_threshold": {
+    "min_decode_tok_s": 15.0,
+    "target_decode_tok_s": 22.0
+  }
+}

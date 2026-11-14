@@ -1,0 +1,65 @@
+[
+  {
+    "name": "IQ2M_Standalone_NGL99",
+    "prompts": {
+      "code": {
+        "tg_tps": 20.67,
+        "pp_tps": 66.35,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "sample_output": "We need answer user: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock."
+      },
+      "json": {
+        "tg_tps": 20.6,
+        "pp_tps": 69.06,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "sample_output": "The user wants a JSON object describing a tool call.\nTool name: run_powershell\nCommand: lists the 5 largest files in C:\\"
+      },
+      "reason": {
+        "tg_tps": 20.58,
+        "pp_tps": 65.78,
+        "n": 128,
+        "draft_n": null,
+        "draft_acc": null,
+        "sample_output": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth "
+      }
+    },
+    "mean_tps": 20.62
+  },
+  {
+    "name": "IQ2M_MTP_Speculative_K2",
+    "prompts": {
+      "code": {
+        "tg_tps": 22.08,
+        "pp_tps": 72.18,
+        "n": 128,
+        "draft_n": 111,
+        "draft_acc": 71,
+        "sample_output": "We need answer user's request: \"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threa",
+        "accept_rate": 0.64
+      },
+      "json": {
+        "tg_tps": 25.14,
+        "pp_tps": 71.82,
+        "n": 128,
+        "draft_n": 97,
+        "draft_acc": 78,
+        "sample_output": "The user wants a JSON object describing a tool call.\nTool name: run_powershell\nCommand: lists the 5 largest files in C:\\",
+        "accept_rate": 0.804
+      },
+      "reason": {
+        "tg_tps": 20.2,
+        "pp_tps": 67.46,
+        "n": 128,
+        "draft_n": 121,
+        "draft_acc": 66,
+        "sample_output": "We need answer user: \"Explain in three short paragraphs why autoregressive decoding at batch size 1 is memory-bandwidth ",
+        "accept_rate": 0.545
+      }
+    },
+    "mean_tps": 22.47
+  }
+]

@@ -1,0 +1,5 @@
+file 'C:/Users/6700XT/Documents/Strata/video_draft/scene1_hook.mp4'
+file 'C:/Users/6700XT/Documents/Strata/video_draft/scene2_bottleneck.mp4'
+file 'C:/Users/6700XT/Documents/Strata/video_draft/scene3_speculative.mp4'
+file 'C:/Users/6700XT/Documents/Strata/video_draft/scene4_surgery_lobotomy.mp4'
+file 'C:/Users/6700XT/Documents/Strata/video_draft/scene5_outro.mp4'

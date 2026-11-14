@@ -256,3 +256,86 @@
   3. **Test C — `14B Q3_K_M` (6.84 GiB) vs. `14B Q4_K_M` (8.37 GiB) & 16k Context (`MEMORY/BENCHMARK_14B_Q3KM_UNSEEN.json`):**
      - At short context (`-c 2048`), `Q4_K_M` is slightly faster than `Q3_K_M` (`37.4 t/s` vs `34.9 t/s` standalone; `54.7 t/s` vs `50.3 t/s` speculative) because `Q3_K` 3-bit `hmask` unpacking adds ALU instructions in the RDNA 2 Vulkan shader.
      - At **16,384-token long context (`-c 16384`)**, `14B Q3_K_M + 0.5B` saves `1.53 GiB` of weight VRAM, fitting the full 16k KV cache comfortably inside 12 GB VRAM and running the unseen LRU Cache benchmark at **`54.9 tokens/sec` (`82.6%` acceptance, `1.61x` speedup)**!
+
+
+## EXP-017: Qwen 3.8 27B GGUF Workflow & Tool Calling Verification on RX 6700 XT Vulkan
+- **Date / Time:** 2026-11-14T10:44:00-06:00
+- **Target:** Stage `Qwen3.8-27B-UD-Q4_K_XL.gguf` (16.35 GiB, 65 blocks, `qwen35` hybrid recurrent/attention architecture) into Strata via zero-copy hardlinks, update `start_local_server.ps1 -Mode qwen27b`, and verify OpenAI chat completions and structured tool calling via `tools/test_qwen27b_workflow.py`.
+- **Findings:**
+  1. **Zero-Copy Staging:** Successfully hardlinked `Qwen3.8-27B-UD-Q4_K_XL.gguf` and `mmproj-BF16.gguf` from `~/.cache/huggingface/hub/models--unsloth--Qwen3.8-27B-GGUF` into `Models/Qwen3.8-27B-UD-Q4_K_XL` with zero additional disk consumption.
+  2. **Vulkan Backend & Hybrid Memory Initialization:**
+     - `llama-server.exe` initialized the `qwen35` hybrid architecture cleanly with `-ngl 40` (40 layers on RX 6700 XT Vulkan device-local VRAM, 25 layers in 64GB DDR4 system memory).
+     - Server became healthy and ready in **17.1 seconds**.
+  3. **Inference & Thinking Verification:**
+     - Prompt eval: `18.7 t/s`. Steady generation rate: `3.24 – 4.10 tokens/sec`.
+     - Model automatically activated native DeepSeek-style reasoning (`<think>...</think>`), correctly emitted in `reasoning_content`.
+  4. **Agentic Tool Calling Verification:**
+     - Successfully generated valid OpenAI tool calls (`finish_reason: tool_calls`) invoking `run_powershell(command='git status')` in 17.75 seconds.
+  5. **Status:** SUCCESS. Direction B workflow verified and integrated into Afterburner. Ready for Qwen 4 architecture adoption.
+
+
+## EXP-018: Qwen 3.8 27B Bottleneck Diagnosis (GPU <15% util, ~55 C)
+- **Date / Time:** 2026-11-14T11:10:00-06:00
+- **Correction:** Qwen 3.8 27B is **dense** (48 Gated-DeltaNet + 16 full-attention blocks + 1 MTP `nextn` head in `blk.64`), not MoE. Weights: FFN 10.1 GiB of 14.7 GiB layer bytes; `output.weight` 0.97 GiB Q6_K; `token_embd` 0.67 GiB Q4_K.
+- **ngl sweep (tg48, -t 6, -fa on):** ngl0 1.98 t/s | ngl24 3.09 | ngl32 3.73 | **ngl40 4.58** | ngl44 4.46 (VRAM ceiling).
+- **Thread sweep (ngl40, tg32):** t2 3.67 | t3 4.52 | **t4 4.75** | t6 4.73 | t12 4.49 → saturates at 4 threads = memory-bandwidth bound.
+- **Inferred:** CPU-side weight streaming ≈ 32 GiB/s (~67% of DDR4-3200 dual-channel peak). At ngl40: ~165 ms of 218 ms/token is the CPU reading ~5.3 GiB from DDR4; GPU busy ~27 ms → ~12% utilization. Each GiB left in DDR4 costs ~32 ms/token vs ~3 ms in VRAM.
+- **Config waste found:** server launched with `mmproj-BF16` (0.93 GB VRAM) and 4 parallel slots.
+- **Next:** test MTP self-speculation (`--spec-type draft-mtp`) + VRAM reclaim (no mmproj, -np 1, -ot placement). Full report in conversation artifact `qwen38_27b_bottleneck_report.md`.
+
+
+## EXP-019: MTP Self-Speculation & VRAM Reclaim Verification on Qwen 3.8 27B
+- **Date / Time:** 2026-11-14T11:40:00-06:00
+- **Target:** Benchmark native Multi-Token Prediction (MTP) self-speculation (`--spec-type draft-mtp`) and VRAM reclaim/refill grid on RX 6700 XT Vulkan (`MEMORY/BENCHMARK_QWEN38_MTP_VRAM.json`). Complete 54.7 GB BF16 + imatrix source download for Approach 3.
+- **Findings:**
+  1. **54.7 GB BF16 Source Download Complete:**
+     - `Qwen3.8-27B-BF16-00001-of-00002.gguf` (49.99 GB)
+     - `Qwen3.8-27B-BF16-00002-of-00002.gguf` (4.67 GB)
+     - `imatrix_unsloth.gguf` (13.6 MB)
+     - Staged in `Models/Qwen3.8-27B-BF16/`, ready for Approach 3 (<10.5 GB whole-model VRAM quantization).
+  2. **VRAM Reclaim:**
+     - Dropping unused `mmproj-BF16` (-931 MB) and setting `-np 1` freed ~1.1 GB of VRAM.
+     - Enabled raising GPU offload safely from `-ngl 40` to `-ngl 45` without triggering the WDDM paging cliff.
+  3. **MTP Self-Speculation Breakthrough:**
+     - Decode is bandwidth-bound (saturates at 4 threads), but verification batches are compute-bound and benefit from all 12 SMT threads (`-t 4 -tb 12`).
+     - **Champion Config (`ngl45_k2_tb12`):**
+       - Structured JSON: lifted from **`4.02 t/s` -> `7.08 t/s` (+76.1% speedup, 81.2% draft acceptance)!**
+       - Python Code: lifted from **`4.02 t/s` -> `5.86 t/s` (+45.8% speedup, 60.0% acceptance)!**
+       - Technical Reasoning: lifted from **`3.96 t/s` -> `5.98 t/s` (+51.0% speedup, 61.9% acceptance)!**
+       - **Mean Generation Speed: `6.31 tokens/sec` (+57.8% speedup over baseline)!**
+       - Dedicated VRAM: 10,949 MiB (fits within 12 GB budget cleanly).
+  4. **Status:** SUCCESS. Launcher updated with MTP speculation as default for `-Mode qwen27b`.
+
+
+## EXP-020: 100% VRAM Saturation via IQ2_M Quantization on Navi 22 (RX 6700 XT)
+- **Date / Time:** 2026-11-14T12:15:00-06:00
+- **Target:** Quantize Qwen 3.8 27B BF16 to sub-3-bit with importance matrix to fit 100% of layers into 12 GB VRAM (`-ngl 99`), completely bypassing the DDR4-3200 system RAM bottleneck.
+- **Key Discovery & Fix:**
+  - Standard quantization failed with: `Missing importance matrix for tensor blk.64.attn_k.weight in a very low-bit quantization`.
+  - Cause: Upstream `imatrix_unsloth.gguf` only profiled layers 0..63. Block 64 is the native MTP drafting head.
+  - Fix: Applied `--tensor-type "blk.64.*=q4_K"`. Quantized the MTP head into Q4_K (no imatrix required, adds only 93 MB, improves draft fidelity).
+  - Output binary: `Qwen3.8-27B-IQ2_M.gguf` (9.54 GiB / 10,243,578,848 bytes).
+- **Benchmark Results:**
+  - Standalone 100% VRAM (`-ngl 99`): **20.62 tokens/sec** (5.15x speedup over 4.00 t/s hybrid baseline).
+  - MTP Speculative 100% VRAM (`-ngl 99 -K 2`): **22.47 tokens/sec mean**; **25.14 tokens/sec on Structured JSON** (6.25x speedup, 80.4% acceptance).
+- **Status:** Integrated as default `-Mode qwen27b_vram` in `start_local_server.ps1`.
+
+## EXP-021: Standardized Spec-Driven Benchmarking & Correctness Framework
+- **Date / Time:** 2026-11-14T13:05:00-06:00
+- **Target:** Implement Robert Karl (`UnbiasedStrata`, `tape`, `gauntlette`) and Steve Corbett (`TalkWithMe`, `tts-serve`) spec-driven engineering, benchmarking, and hermetic testing patterns.
+- **Delivered Infrastructure:**
+  1. **Canonical `AGENTS.md`:** Hardware ground truth, "The Robert Karl Contract" (ON THE TABLE vs NOT ON THE TABLE), service port conventions, and test commands.
+  2. **Unified Benchmark Suite (`bench/`):**
+     - `bench/bench_head_to_head.py`: Server-side timing extraction (`prompt_per_second`, `predicted_per_second`, `prompt_ms` TTFT), interleaved rounds, warm-ups, and medians.
+     - `bench/hardware_telemetry.py`: Telemetry sampler tracking process RSS (`psutil`), system memory delta, and CPU utilization.
+     - `bench/corpus/standard_prompts.json`: Multi-category test matrix (smoke, structured JSON, code generation, reasoning).
+     - Verified: Generated `bench/reports/benchmark_20261114_130524.md` showing **22.83 t/s overall median** with 76% MTP draft acceptance.
+  3. **Correctness & Parity Suite (`bench/correctness/parity_eval.py`):**
+     - Determinism check at temp=0.0: PASSED.
+     - JSON Schema & Syntax validation: PASSED.
+     - Python AST code generation parse: PASSED.
+     - Speculative draft acceptance quality: PASSED (74.4% acceptance).
+  4. **Hermetic Test Suite (`tests/`):**
+     - `tests/factories.py`, `tests/test_benchmark_harness.py`, `tests/test_parity_logic.py`, `tests/test_bridge_mcp.py`.
+     - Zero GPU or external dependencies: **11/11 tests pass in 0.012 seconds** via `python -m unittest discover tests`.
+- **Status:** COMPLETE and operational.

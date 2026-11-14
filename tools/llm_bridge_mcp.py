@@ -80,7 +80,14 @@ def call_local_llm(prompt: str, system_prompt: str = None, temperature: float = 
     try:
         with urllib.request.urlopen(req, timeout=180) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-            return data["choices"][0]["message"]["content"]
+            msg = data["choices"][0]["message"]
+            content = msg.get("content") or ""
+            reasoning = msg.get("reasoning_content") or ""
+            if reasoning and content:
+                return f"<think>\n{reasoning.strip()}\n</think>\n\n{content.strip()}"
+            elif reasoning and not content:
+                return f"<think>\n{reasoning.strip()}\n</think>"
+            return content
     except urllib.error.URLError:
         return (
             f"Cannot connect to local LLM server at {endpoint}. "
