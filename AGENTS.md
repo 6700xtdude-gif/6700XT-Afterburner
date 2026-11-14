@@ -38,15 +38,16 @@
 - **Port `8081`:** Dedicated secondary draft server (reserved for two-process speculative decoding / JEV setups).
 - **Launcher:** Always launch through [`start_local_server.ps1`](file:///c:/Users/6700XT/Documents/Strata/start_local_server.ps1):
   ```powershell
-  # 100% VRAM 27B model (IQ2_M + MTP speculation, ~22-25 t/s)
-  .\start_local_server.ps1 -Mode qwen27b_vram
+  # 100% VRAM 27B model (IQ2_M + MTP speculation, default 64k context)
+  .\start_local_server.ps1 -Mode qwen27b_vram -CtxSize 65536
 
-  # Hybrid offload 27B model (Q4_K_XL + MTP speculation, ~6-7 t/s)
-  .\start_local_server.ps1 -Mode qwen27b
+  # Hybrid offload 27B model (Q4_K_XL + MTP speculation, 64k context)
+  .\start_local_server.ps1 -Mode qwen27b -CtxSize 65536
 
-  # Verified 14B model (Q4_K_M, ~26 t/s)
-  .\start_local_server.ps1 -Mode qwen14b
+  # Verified 14B model (Q4_K_M, 64k context)
+  .\start_local_server.ps1 -Mode speculative14b -CtxSize 65536
   ```
+- **End-to-End Context Consistency Invariant:** Agent harnesses (such as Pi) pass extensive tool declarations and prompts that exceed 8k tokens on the first call. The server context (`-c $CtxSize`, default 65536) must match the client-side configuration (`models.json: contextWindow: 65536`) to prevent HTTP 400 `exceed_context_size_error`. On 27B models with 64k context, `start_local_server.ps1` automatically applies `-ctk q4_0 -ctv q4_0` to preserve the 12 GB VRAM budget.
 
 ---
 

@@ -2,11 +2,21 @@
 param(
     [ValidateSet("speculative", "healed18l", "healed14l", "dory19l", "speculative14b", "moe35b", "qwen27b", "qwen27b_vram")]
     [string]$Mode = "qwen27b_vram",
-    [int]$K = 3
+    [int]$K = 3,
+    [int]$CtxSize = 65536,
+    [string]$Ctk = "q8_0",
+    [string]$Ctv = "q8_0"
 )
 
 $RootDir = $PSScriptRoot
 $BinDir  = Join-Path $RootDir "bin\vulkan"
+
+# Auto-adjust KV cache quantization if 64k+ context on 27B model to stay within VRAM bounds
+if ($CtxSize -gt 32768 -and ($Mode -eq "qwen27b_vram" -or $Mode -eq "qwen27b") -and $PSBoundParameters.ContainsKey('Ctk') -eq $false) {
+    Write-Host "[INFO] Large context ($CtxSize) requested on 27B model: setting KV cache to q4_0 to protect GDDR6 allocation." -ForegroundColor DarkYellow
+    $Ctk = "q4_0"
+    $Ctv = "q4_0"
+}
 
 if ($Mode -eq "qwen27b_vram") {
     $Host.UI.RawUI.WindowTitle = "6700XT-Afterburner: 100% VRAM Vulkan 27B Server (RX 6700 XT)"
@@ -24,7 +34,7 @@ if ($Mode -eq "qwen27b_vram") {
     Write-Host " GPU Layers: 65/65 (ALL on RX 6700 XT GDDR6, 0 in DDR4!)" -ForegroundColor White
     Write-Host " Speculation: Native Multi-Token Prediction (K=2)" -ForegroundColor White
     Write-Host " Speed: Up to 25.1 tokens/sec on Navi 22 (6.25x speedup!)" -ForegroundColor White
-    Write-Host " KV Cache: Q8_0 + FlashAttention (8k context)" -ForegroundColor White
+    Write-Host " KV Cache: $Ctk/$Ctv + FlashAttention ($CtxSize context)" -ForegroundColor White
     Write-Host "==========================================================" -ForegroundColor Cyan
 
     & "$BinDir\llama-server.exe" `
@@ -37,9 +47,9 @@ if ($Mode -eq "qwen27b_vram") {
         --spec-type draft-mtp `
         --spec-draft-n-max 2 `
         -fa on `
-        -ctk q8_0 `
-        -ctv q8_0 `
-        -c 8192
+        -ctk $Ctk `
+        -ctv $Ctv `
+        -c $CtxSize
 } elseif ($Mode -eq "qwen27b") {
     $Host.UI.RawUI.WindowTitle = "6700XT-Afterburner: Local Vulkan 27B Hybrid Server (RX 6700 XT)"
     $ModelPath = Join-Path $RootDir "Models\Qwen3.8-27B-UD-Q4_K_XL\Qwen3.8-27B-UD-Q4_K_XL.gguf"
@@ -55,7 +65,7 @@ if ($Mode -eq "qwen27b_vram") {
     Write-Host " Model: Qwen 3.8 27B (UD-Q4_K_XL, MTP Speculative Enabled)" -ForegroundColor White
     Write-Host " GPU Layers: 45 on RX 6700 XT VRAM, remainder in 64GB DDR4" -ForegroundColor White
     Write-Host " Speculation: Native Multi-Token Prediction (K=2, tb=12)" -ForegroundColor White
-    Write-Host " KV Cache: Q8_0 + FlashAttention (8k context) + Cache-Reuse" -ForegroundColor White
+    Write-Host " KV Cache: $Ctk/$Ctv + FlashAttention ($CtxSize context) + Cache-Reuse" -ForegroundColor White
     Write-Host "==========================================================" -ForegroundColor Cyan
 
     & "$BinDir\llama-server.exe" `
@@ -69,9 +79,9 @@ if ($Mode -eq "qwen27b_vram") {
         --spec-type draft-mtp `
         --spec-draft-n-max 2 `
         -fa on `
-        -ctk q8_0 `
-        -ctv q8_0 `
-        -c 8192 `
+        -ctk $Ctk `
+        -ctv $Ctv `
+        -c $CtxSize `
         --cache-reuse 64
 } elseif ($Mode -eq "moe35b") {
     $Host.UI.RawUI.WindowTitle = "6700XT-Afterburner: Local Vulkan 35B MoE Server (RX 6700 XT)"
@@ -87,7 +97,7 @@ if ($Mode -eq "qwen27b_vram") {
     Write-Host " Endpoint: http://127.0.0.1:8080/v1" -ForegroundColor Green
     Write-Host " Model: Qwen 3.6 35B-A3B (UD-Q4_K_XL)" -ForegroundColor White
     Write-Host " GPU Layers: 16 on RX 6700 XT, remainder in 64GB DDR4" -ForegroundColor White
-    Write-Host " KV Cache: Q8_0 + FlashAttention (8k context)" -ForegroundColor White
+    Write-Host " KV Cache: $Ctk/$Ctv + FlashAttention ($CtxSize context)" -ForegroundColor White
     Write-Host "==========================================================" -ForegroundColor Cyan
 
     & "$BinDir\llama-server.exe" `
@@ -96,9 +106,9 @@ if ($Mode -eq "qwen27b_vram") {
         --port 8080 `
         -ngl 16 `
         -fa on `
-        -ctk q8_0 `
-        -ctv q8_0 `
-        -c 8192 `
+        -ctk $Ctk `
+        -ctv $Ctv `
+        -c $CtxSize `
         -t 6
 } else {
     $Host.UI.RawUI.WindowTitle = "6700XT-Afterburner: Dual-Engine Speculative Vulkan Server (RX 6700 XT)"
@@ -129,7 +139,7 @@ if ($Mode -eq "qwen27b_vram") {
     Write-Host " Target Model: Qwen 2.5 Coder 7B (Q4_K_M) - 100% in VRAM" -ForegroundColor White
     Write-Host " Draft Engine: Qwen 2.5 Coder 0.5B (Q4_0) - 100% in VRAM (K=$K)" -ForegroundColor White
     Write-Host " Peak Speed:   Up to 95.5 tokens/sec on AMD Radeon RX 6700 XT" -ForegroundColor White
-    Write-Host " KV Cache:     Q8_0 + FlashAttention (8k context)" -ForegroundColor White
+    Write-Host " KV Cache:     $Ctk/$Ctv + FlashAttention ($CtxSize context)" -ForegroundColor White
     Write-Host "==========================================================" -ForegroundColor Cyan
 
     & "$BinDir\llama-server.exe" `
@@ -142,8 +152,8 @@ if ($Mode -eq "qwen27b_vram") {
         --spec-type draft-simple `
         --spec-draft-n-max $K `
         -fa on `
-        -ctk q8_0 `
-        -ctv q8_0 `
-        -c 8192 `
+        -ctk $Ctk `
+        -ctv $Ctv `
+        -c $CtxSize `
         -t 6
 }

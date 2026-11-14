@@ -339,3 +339,43 @@
      - `tests/factories.py`, `tests/test_benchmark_harness.py`, `tests/test_parity_logic.py`, `tests/test_bridge_mcp.py`.
      - Zero GPU or external dependencies: **11/11 tests pass in 0.012 seconds** via `python -m unittest discover tests`.
 - **Status:** COMPLETE and operational.
+
+## EXP-022: YouTube Idea Radar Pipeline & 64GB RAM / Pagefile Test Matrix Formulation
+- **Date / Time:** 2026-11-14T14:15:00-06:00
+- **Target:** Ingest and analyze Alex (@AlexFP16) YouTube video on Qwen 3.6 35B A3B (`EudtrgdS4JU`), build automated browser-based YouTube Idea Radar pipeline, and formulate 64GB vs 32GB RAM / pagefile evaluation protocol for community report-back.
+- **Key Discoveries & Infrastructure:**
+  1. **Alex Video Technical Extraction:**
+     - Evaluated `Unsloth Qwen 3.6 35B A3B UD-Q4_K_XL` (23 GB GGUF) on RTX 3060 12GB + Ryzen 5 5600 + 64GB DDR4.
+     - Confirmed Strata claimed 1.5x throughput from a 20-thread CPU benchmark; on 6-core Ryzen 5600, Strata fell to ~29 t/s (23 t/s on 8k prompt) and 32 t/s 4-way batch (vs 85 t/s on llama.cpp).
+     - Confirmed Strata 0.2.12 MTP speculation drafted 0 tokens (0% acceptance).
+     - Verified `llama.cpp` PR #30966 allows CPU to execute MoE misses in system RAM directly (`--moe-cache-cpu-share 1.0`), hitting 51 t/s (67 t/s with MTP).
+  2. **Automated YouTube Idea Radar (`tools/youtube_radar.py`):**
+     - Built zero-friction pipeline reading Chrome/Edge SQLite history directly (`%LOCALAPPDATA%\Google\Chrome\User Data\Default\History`).
+     - Automated English transcript extraction via `youtube-transcript-api`.
+     - Filtered transcripts through RX 6700 XT silicon invariants (192-bit bus, 96MB Infinity Cache, MoE offloading, MTP speculation, Vulkan).
+     - Successfully ingested and categorized 10 recent videos to `docs/YOUTUBE_IDEA_RADAR.md` and `MEMORY/watched_youtube_ledger.jsonl`.
+  3. **64GB RAM & Windows Pagefile Evaluation Matrix:**
+     - Validated silicon reality: DDR4-3200 memory bandwidth is identical (~32 GiB/s) between 32GB and 64GB kits; raw decode t/s for dense models is unchanged.
+     - Identified true 64GB value proposition: prevents catastrophic NVMe SSD paging (<1 t/s) for 23GB+ MoE models and 64k context KV caches.
+     - Formulated 4-phase benchmark matrix: 64GB System-Managed vs 64GB Manual Pagefile (96 GB / 192 GB) vs 32GB baseline.
+- **Status:** COMPLETE. Pipeline operational; ready for live baseline execution.
+
+## EXP-022: Pi Coding Agent Harness Integration, Unsandboxed Host Tools & End-to-End Context Consistency
+- **Date / Time:** 2026-11-14T14:15:00-06:00
+- **Target:** Install, configure, and verify the Pi coding agent harness (`@earendil-works/pi-coding-agent` v1.5.2) against local 6700XT-Afterburner models (`http://127.0.0.1:8080/v1`) with full host tool execution (PowerShell, Bash, web research) and 64k context window.
+- **Key Discoveries & Fixes:**
+  1. **Runtime & Harness Setup:**
+     - Installed standalone Node.js LTS v22.23.5 and Pi v1.5.2. Persisted to user PATH.
+     - Configured PowerShell execution policy to `RemoteSigned` for `CurrentUser`.
+     - Created `start_pi_afterburner.ps1` launcher.
+  2. **End-to-End Context Window Alignment (HTTP 400 Exceed Context Size):**
+     - Issue: Pi transmitted an 8,679-token tool schema + workspace payload, causing `llama-server.exe` to fail with HTTP 400 `exceed_context_size_error` against hardcoded `-c 8192`.
+     - Fix: Updated `start_local_server.ps1` to support `-CtxSize 65536` default across all modes.
+     - VRAM Guard: Auto-set `-ctk q4_0 -ctv q4_0` for $\ge$32k context on 27B models to ensure KV cache stays within 12 GB GDDR6 budget (~4.3 GB vs ~8.6 GB).
+     - Pre-flight: `start_pi_afterburner.ps1` checks `/props` and warns if server was launched with $<64\text{k}$ context.
+  3. **Unsandboxed Host Tools & Web Research:**
+     - Configured `~/.pi/agent/settings.json` with `defaultTools: ["read", "bash", "powershell", "edit", "write"]`.
+     - Integrated `pi-search-hub` and Python `ddgs`, providing keyless DuckDuckGo web search and Jina Reader `web_read`.
+     - Audited live session (`01a1dba7`): Verified that host hostname is literally `SANDBOX` (triggering model sandbox hallucination). Confirmed all tools (`powershell`, `bash`, `web_search`) executed natively on host; isolated failure modes to model cmdlet syntax errors and UAC elevation requirements for `slmgr.vbs`.
+- **Status:** COMPLETE, verified, and operational.
+
