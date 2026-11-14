@@ -1,0 +1,110 @@
+{
+  "part_a_35b_ngram": [
+    {
+      "workload": "Unseen Refactoring (High Context N-Gram Overlap)",
+      "config": "1. Standalone 35B-A3B Baseline",
+      "gen_ts": 15.8,
+      "speedup": 1.0,
+      "acc_rate": null,
+      "accepted": null,
+      "drafted": null
+    },
+    {
+      "workload": "Unseen Refactoring (High Context N-Gram Overlap)",
+      "config": "2. 35B-A3B + ngram-simple (n=3, m=12)",
+      "gen_ts": 12.7,
+      "speedup": 0.8,
+      "acc_rate": 19.444,
+      "accepted": 14,
+      "drafted": 72
+    },
+    {
+      "workload": "Unseen Refactoring (High Context N-Gram Overlap)",
+      "config": "3. 35B-A3B + ngram-mod (match=6, min=4, max=16)",
+      "gen_ts": 13.5,
+      "speedup": 0.85,
+      "acc_rate": 3.2259999999999995,
+      "accepted": 2,
+      "drafted": 62
+    },
+    {
+      "workload": "Unseen Refactoring (High Context N-Gram Overlap)",
+      "config": "4. 35B-A3B + ngram-cache",
+      "gen_ts": 12.1,
+      "speedup": 0.77,
+      "acc_rate": 27.381,
+      "accepted": 23,
+      "drafted": 84
+    },
+    {
+      "workload": "Unseen JSON API Response (Repeated Schema Keys)",
+      "config": "1. Standalone 35B-A3B Baseline",
+      "gen_ts": 15.6,
+      "speedup": 1.0,
+      "acc_rate": null,
+      "accepted": null,
+      "drafted": null
+    },
+    {
+      "workload": "Unseen JSON API Response (Repeated Schema Keys)",
+      "config": "2. 35B-A3B + ngram-simple (n=3, m=12)",
+      "gen_ts": 12.3,
+      "speedup": 0.79,
+      "acc_rate": 7.446999999999999,
+      "accepted": 7,
+      "drafted": 94
+    },
+    {
+      "workload": "Unseen JSON API Response (Repeated Schema Keys)",
+      "config": "3. 35B-A3B + ngram-mod (match=6, min=4, max=16)",
+      "gen_ts": 15.6,
+      "speedup": 1.0,
+      "acc_rate": null,
+      "accepted": null,
+      "drafted": null
+    },
+    {
+      "workload": "Unseen JSON API Response (Repeated Schema Keys)",
+      "config": "4. 35B-A3B + ngram-cache",
+      "gen_ts": 11.7,
+      "speedup": 0.75,
+      "acc_rate": 10.577,
+      "accepted": 11,
+      "drafted": 104
+    }
+  ],
+  "part_b_cache_reuse": {
+    "WITHOUT --cache-reuse (Default)": {
+      "turn1_cold": {
+        "prompt_ms": 11600.8,
+        "prompt_n": 1842,
+        "predicted_ms": 1391.7,
+        "predicted_per_second": 16.5,
+        "wall_ms": 13015.4
+      },
+      "turn2_edited_middle": {
+        "prompt_ms": 10735.7,
+        "prompt_n": 1842,
+        "predicted_ms": 553.9,
+        "predicted_per_second": 41.5,
+        "wall_ms": 11349.9
+      }
+    },
+    "WITH --cache-reuse 64": {
+      "turn1_cold": {
+        "prompt_ms": 10762.1,
+        "prompt_n": 1842,
+        "predicted_ms": 564.3,
+        "predicted_per_second": 40.8,
+        "wall_ms": 11342.6
+      },
+      "turn2_edited_middle": {
+        "prompt_ms": 10766.0,
+        "prompt_n": 1842,
+        "predicted_ms": 561.5,
+        "predicted_per_second": 41.0,
+        "wall_ms": 11394.2
+      }
+    }
+  }
+}

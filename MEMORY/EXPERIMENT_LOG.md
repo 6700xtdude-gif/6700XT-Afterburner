@@ -240,3 +240,19 @@
      - **`Healed 18L` (6 layers cut)** generalized moderately at **`48.1 t/s` (`+26%` speedup, `57.1%` acceptance)**.
      - **`Healed 14L` (`37.0 t/s`, `34.2%` acceptance)** and **`Dory-Looped 19L` (`34.7 t/s`, `32.1%` acceptance)** overfit to the 4 calibration prompts and did not beat standalone 14B on unseen code because 10 dropped layers cannot be recovered across general code domains from 4 calibration paragraphs.
   2. **Production Default Updated:** Set `start_local_server.ps1 -Mode speculative14b` to use the verified `Stock Untouched 0.5B (24L)` drafter (`Qwen2.5-Coder-0.5B-Instruct-Q4_0.gguf`).
+
+
+## EXP-016: Complete Blind Benchmark Suite — 0.5B vs 1.5B Drafter, 35B MoE N-Gram, KV Cache Reuse, and 14B Q3_K_M @ 16k Context
+- **Date / Time:** 2026-11-14T03:40:26-06:00
+- **Target:** Execute all three blind verification benchmarks (`tools/benchmark_bottleneck1_draft_ceiling.py`, `tools/benchmark_35b_ngram_and_cache_reuse.py`, `tools/test_cache_reuse_detail.py`, and `tools/benchmark_14b_q3km_vs_q4km.py`) on held-out unseen prompts.
+- **Findings:**
+  1. **Test A — `0.5B` vs. `1.5B` Drafter on 4 Unseen Prompts (`MEMORY/BENCHMARK_BOTTLENECK1_UNSEEN.json`):**
+     - `Qwen2.5-Coder-1.5B-Instruct-Q4_0` (`1,016 MiB`) achieved higher raw $K=3$ draft acceptance than `0.5B` (`330 MiB`) across all 4 unseen prompts (`83.2%` mean vs. `76.7%` mean).
+     - However, because `1.5B` streams 3.1x more weight bytes per draft step across the 192-bit GDDR6 bus, **`0.5B` beat `1.5B` in end-to-end tokens/sec on every single unseen prompt (`54.7 t/s` mean [1.46x] vs. `50.5 t/s` mean [1.35x])** while saving 686 MB of VRAM.
+     - Enabling `--spec-type ngram-simple,draft-simple --spec-draft-n-max 5 --spec-draft-p-min 0.70` lifted `0.5B` mean unseen acceptance from **`76.7%` to `87.3%`** (peaking at `95.7%` [88/92] on Dijkstra and `56.4 t/s` [1.50x] on PostgreSQL CTE).
+  2. **Test B — 35B MoE N-Gram Speculation & `llama-server` KV Cache Reuse (`MEMORY/BENCHMARK_35B_NGRAM_AND_CACHE.json`):**
+     - On CPU-offloaded `Qwen3.6-35B-A3B` (`-ngl 16`, `15.8 t/s` baseline), `ngram-simple` / `ngram-cache` achieved `19.4%–27.4%` acceptance but reduced speed to `12.1–13.5 t/s` (`0.77x–0.85x`) because unaccepted batch tokens activate distinct MoE experts in DDR4 RAM (`pp = 21.0 t/s` vs `tg = 15.6 t/s`).
+     - On `llama-server` (`14B + 0.5B`), KV prefix caching + `--cache-reuse 64` reduced Turn-2 multi-turn follow-up prompt evaluation on a 1,277-token codebase from **`6,033.3 ms` down to `305.3 ms` (`19.8x` faster TTFT, `2.84x` faster than default prefix caching at `866.8 ms`)**.
+  3. **Test C — `14B Q3_K_M` (6.84 GiB) vs. `14B Q4_K_M` (8.37 GiB) & 16k Context (`MEMORY/BENCHMARK_14B_Q3KM_UNSEEN.json`):**
+     - At short context (`-c 2048`), `Q4_K_M` is slightly faster than `Q3_K_M` (`37.4 t/s` vs `34.9 t/s` standalone; `54.7 t/s` vs `50.3 t/s` speculative) because `Q3_K` 3-bit `hmask` unpacking adds ALU instructions in the RDNA 2 Vulkan shader.
+     - At **16,384-token long context (`-c 16384`)**, `14B Q3_K_M + 0.5B` saves `1.53 GiB` of weight VRAM, fitting the full 16k KV cache comfortably inside 12 GB VRAM and running the unseen LRU Cache benchmark at **`54.9 tokens/sec` (`82.6%` acceptance, `1.61x` speedup)**!

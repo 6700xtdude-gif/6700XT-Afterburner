@@ -1,0 +1,130 @@
+[
+  {
+    "prompt": "Unseen Python (LRU Cache)",
+    "config": "1. Standalone 14B Q3_K_M (6.84 GiB)",
+    "gen_ts": 34.0,
+    "speedup_vs_q3_base": 1.0,
+    "speedup_vs_q4_base": 0.91,
+    "acc_rate": null,
+    "accepted": null,
+    "drafted": null
+  },
+  {
+    "prompt": "Unseen Python (LRU Cache)",
+    "config": "2. 14B Q3_K_M + 0.5B (draft-simple, K=3)",
+    "gen_ts": 43.2,
+    "speedup_vs_q3_base": 1.27,
+    "speedup_vs_q4_base": 1.16,
+    "acc_rate": 82.569,
+    "accepted": 90,
+    "drafted": 109
+  },
+  {
+    "prompt": "Unseen Python (LRU Cache)",
+    "config": "3. 14B Q3_K_M + 0.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 33.9,
+    "speedup_vs_q3_base": 1.0,
+    "speedup_vs_q4_base": 0.91,
+    "acc_rate": 86.275,
+    "accepted": 88,
+    "drafted": 102
+  },
+  {
+    "prompt": "Unseen Algorithms (Dijkstra)",
+    "config": "1. Standalone 14B Q3_K_M (6.84 GiB)",
+    "gen_ts": 34.9,
+    "speedup_vs_q3_base": 1.0,
+    "speedup_vs_q4_base": 0.93,
+    "acc_rate": null,
+    "accepted": null,
+    "drafted": null
+  },
+  {
+    "prompt": "Unseen Algorithms (Dijkstra)",
+    "config": "2. 14B Q3_K_M + 0.5B (draft-simple, K=3)",
+    "gen_ts": 50.7,
+    "speedup_vs_q3_base": 1.45,
+    "speedup_vs_q4_base": 1.36,
+    "acc_rate": 74.359,
+    "accepted": 87,
+    "drafted": 117
+  },
+  {
+    "prompt": "Unseen Algorithms (Dijkstra)",
+    "config": "3. 14B Q3_K_M + 0.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 40.0,
+    "speedup_vs_q3_base": 1.15,
+    "speedup_vs_q4_base": 1.07,
+    "acc_rate": 94.681,
+    "accepted": 89,
+    "drafted": 94
+  },
+  {
+    "prompt": "Unseen SQL (PostgreSQL Window CTE)",
+    "config": "1. Standalone 14B Q3_K_M (6.84 GiB)",
+    "gen_ts": 34.9,
+    "speedup_vs_q3_base": 1.0,
+    "speedup_vs_q4_base": 0.93,
+    "acc_rate": null,
+    "accepted": null,
+    "drafted": null
+  },
+  {
+    "prompt": "Unseen SQL (PostgreSQL Window CTE)",
+    "config": "2. 14B Q3_K_M + 0.5B (draft-simple, K=3)",
+    "gen_ts": 52.9,
+    "speedup_vs_q3_base": 1.52,
+    "speedup_vs_q4_base": 1.41,
+    "acc_rate": 78.07,
+    "accepted": 89,
+    "drafted": 114
+  },
+  {
+    "prompt": "Unseen SQL (PostgreSQL Window CTE)",
+    "config": "3. 14B Q3_K_M + 0.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 46.0,
+    "speedup_vs_q3_base": 1.32,
+    "speedup_vs_q4_base": 1.23,
+    "acc_rate": 78.049,
+    "accepted": 96,
+    "drafted": 123
+  },
+  {
+    "prompt": "Unseen Refactor/Edit (Code Transformation)",
+    "config": "1. Standalone 14B Q3_K_M (6.84 GiB)",
+    "gen_ts": 34.9,
+    "speedup_vs_q3_base": 1.0,
+    "speedup_vs_q4_base": 0.93,
+    "acc_rate": null,
+    "accepted": null,
+    "drafted": null
+  },
+  {
+    "prompt": "Unseen Refactor/Edit (Code Transformation)",
+    "config": "2. 14B Q3_K_M + 0.5B (draft-simple, K=3)",
+    "gen_ts": 54.2,
+    "speedup_vs_q3_base": 1.55,
+    "speedup_vs_q4_base": 1.45,
+    "acc_rate": 81.818,
+    "accepted": 90,
+    "drafted": 110
+  },
+  {
+    "prompt": "Unseen Refactor/Edit (Code Transformation)",
+    "config": "3. 14B Q3_K_M + 0.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 53.7,
+    "speedup_vs_q3_base": 1.54,
+    "speedup_vs_q4_base": 1.44,
+    "acc_rate": 92.0,
+    "accepted": 92,
+    "drafted": 100
+  },
+  {
+    "prompt": "16k Context Verification (-c 16384)",
+    "config": "14B Q3_K_M + 0.5B @ 16k",
+    "gen_ts": 54.9,
+    "acc_rate": 82.569,
+    "accepted": 90,
+    "drafted": 109
+  }
+]
