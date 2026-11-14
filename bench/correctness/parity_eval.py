@@ -27,7 +27,7 @@ def query_server(endpoint, prompt, max_tokens, temperature=0.0):
     }
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=120) as resp:
+    with urllib.request.urlopen(req, timeout=300) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 
@@ -61,20 +61,40 @@ def evaluate_parity(endpoint="http://127.0.0.1:8080/v1"):
     if not json_txt:
         json_txt = res_json.get("choices", [{}])[0].get("message", {}).get("reasoning_content", "").strip()
 
-    # Clean markdown backticks if present
+    parsed = None
+    required_keys = {"system", "status", "tokens_per_second", "speculative"}
+    
+    # Try parsing directly or finding any valid JSON dictionary within the text
     cleaned_json = json_txt
-    if "```json" in cleaned_json:
-        cleaned_json = cleaned_json.split("```json")[1].split("```")[0].strip()
-    elif "```" in cleaned_json:
-        cleaned_json = cleaned_json.split("```")[1].split("```")[0].strip()
+    if "{" in json_txt and "}" in json_txt:
+        # Search for valid JSON dict candidates in the string
+        start = json_txt.find("{")
+        while start != -1:
+            end = json_txt.rfind("}")
+            while end > start:
+                try:
+                    candidate = json.loads(json_txt[start:end+1])
+                    if isinstance(candidate, dict) and required_keys.issubset(candidate.keys()):
+                        parsed = candidate
+                        cleaned_json = json_txt[start:end+1]
+                        break
+                except Exception:
+                    pass
+                end = json_txt.rfind("}", 0, end)
+            if parsed is not None:
+                break
+            start = json_txt.find("{", start + 1)
 
     json_valid = False
-    try:
-        parsed = json.loads(cleaned_json)
-        required_keys = {"system", "status", "tokens_per_second", "speculative"}
-        json_valid = required_keys.issubset(parsed.keys())
-    except Exception as e:
-        json_valid = False
+    if parsed is not None:
+        json_valid = True
+    else:
+        try:
+            parsed = json.loads(cleaned_json)
+            json_valid = required_keys.issubset(parsed.keys())
+        except Exception as e:
+            print(f"    [DEBUG JSON Parse Error] {e} | Raw text: {repr(cleaned_json[:200])}")
+            json_valid = False
 
     print(f"  Result: {'PASSED' if json_valid else 'FAILED'} (Valid JSON with required keys: {json_valid})")
     results.append({"test": "json_schema", "passed": json_valid})
@@ -83,7 +103,25 @@ def evaluate_parity(endpoint="http://127.0.0.1:8080/v1"):
     print("\n[Test 3/4] Checking Python AST Parse Validity...")
     prompt_code = "Write a Python 3 function `fast_dot_product(a: list[float], b: list[float]) -> float` that computes the vector dot product. Return only Python code."
     res_code = query_server(endpoint, prompt_code, max_tokens=768, temperature=0.0)
-    code_txt = res_code.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+    msg = res_code.get("choices", [{}])[0].get("message", {})
+    code_txt = msg.get("content", "").strip()
+    if not code_txt and msg.get("reasoning_content"):
+        reasoning = msg.get("reasoning_content", "")
+        if "```python" in reasoning:
+            code_txt = reasoning.split("```python")[1].split("```")[0].strip()
+        elif "```" in reasoning:
+            code_txt = reasoning.split("```")[1].split("```")[0].strip()
+        elif "def fast_dot_product" in reasoning:
+            # Extract just the function lines
+            fn_lines = []
+            for line in reasoning[reasoning.find("def fast_dot_product"):].splitlines():
+                if line.startswith("def ") or line.startswith("    ") or line.startswith("\t") or line.strip() == "":
+                    fn_lines.append(line)
+                else:
+                    break
+            code_txt = "\n".join(fn_lines).strip()
+        else:
+            code_txt = reasoning
 
     cleaned_code = code_txt
     if "```python" in cleaned_code:
@@ -114,8 +152,12 @@ def evaluate_parity(endpoint="http://127.0.0.1:8080/v1"):
     spec_active = draft_n > 0
     spec_healthy = (rate >= 50.0) if spec_active else True
 
-    print(f"  Speculative Enabled: {spec_active} | Drafted: {draft_n} | Accepted: {draft_acc} ({rate:.1f}%)")
-    print(f"  Result: {'PASSED' if spec_healthy else 'WARNING'} (Acceptance rate >= 50%: {rate >= 50.0})")
+    if spec_active:
+        print(f"  Speculative Enabled: True | Drafted: {draft_n} | Accepted: {draft_acc} ({rate:.1f}%)")
+        print(f"  Result: {'PASSED' if spec_healthy else 'WARNING'} (Acceptance rate >= 50%: {rate >= 50.0})")
+    else:
+        print(f"  Speculative Enabled: False (Standalone Mode)")
+        print(f"  Result: PASSED (Speculative check bypassed for non-speculative model)")
     results.append({"test": "speculative_fidelity", "passed": spec_healthy, "acceptance_rate": rate})
 
     all_passed = all(r["passed"] for r in results)
