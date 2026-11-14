@@ -1,0 +1,218 @@
+[
+  {
+    "prompt": "Unseen Python (LRU Cache)",
+    "config": "1. Standalone 14B Baseline",
+    "gen_ts": 37.3,
+    "speedup": 1.0,
+    "acc_rate": null,
+    "accepted": null,
+    "drafted": null
+  },
+  {
+    "prompt": "Unseen Python (LRU Cache)",
+    "config": "2. 14B + 0.5B (draft-simple, K=3)",
+    "gen_ts": 53.4,
+    "speedup": 1.43,
+    "acc_rate": 74.359,
+    "accepted": 87,
+    "drafted": 117
+  },
+  {
+    "prompt": "Unseen Python (LRU Cache)",
+    "config": "3. 14B + 0.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 54.7,
+    "speedup": 1.47,
+    "acc_rate": 88.35,
+    "accepted": 91,
+    "drafted": 103
+  },
+  {
+    "prompt": "Unseen Python (LRU Cache)",
+    "config": "4. 14B + 1.5B (draft-simple, K=3)",
+    "gen_ts": 50.0,
+    "speedup": 1.34,
+    "acc_rate": 81.818,
+    "accepted": 90,
+    "drafted": 110
+  },
+  {
+    "prompt": "Unseen Python (LRU Cache)",
+    "config": "5. 14B + 1.5B (draft-simple, K=4)",
+    "gen_ts": 44.1,
+    "speedup": 1.18,
+    "acc_rate": 70.455,
+    "accepted": 93,
+    "drafted": 132
+  },
+  {
+    "prompt": "Unseen Python (LRU Cache)",
+    "config": "6. 14B + 1.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 48.3,
+    "speedup": 1.29,
+    "acc_rate": 85.586,
+    "accepted": 95,
+    "drafted": 111
+  },
+  {
+    "prompt": "Unseen Algorithms (Dijkstra)",
+    "config": "1. Standalone 14B Baseline",
+    "gen_ts": 37.4,
+    "speedup": 1.0,
+    "acc_rate": null,
+    "accepted": null,
+    "drafted": null
+  },
+  {
+    "prompt": "Unseen Algorithms (Dijkstra)",
+    "config": "2. 14B + 0.5B (draft-simple, K=3)",
+    "gen_ts": 55.0,
+    "speedup": 1.47,
+    "acc_rate": 77.193,
+    "accepted": 88,
+    "drafted": 114
+  },
+  {
+    "prompt": "Unseen Algorithms (Dijkstra)",
+    "config": "3. 14B + 0.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 54.5,
+    "speedup": 1.46,
+    "acc_rate": 95.652,
+    "accepted": 88,
+    "drafted": 92
+  },
+  {
+    "prompt": "Unseen Algorithms (Dijkstra)",
+    "config": "4. 14B + 1.5B (draft-simple, K=3)",
+    "gen_ts": 50.5,
+    "speedup": 1.35,
+    "acc_rate": 83.333,
+    "accepted": 90,
+    "drafted": 108
+  },
+  {
+    "prompt": "Unseen Algorithms (Dijkstra)",
+    "config": "5. 14B + 1.5B (draft-simple, K=4)",
+    "gen_ts": 49.8,
+    "speedup": 1.33,
+    "acc_rate": 83.621,
+    "accepted": 97,
+    "drafted": 116
+  },
+  {
+    "prompt": "Unseen Algorithms (Dijkstra)",
+    "config": "6. 14B + 1.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 49.2,
+    "speedup": 1.32,
+    "acc_rate": 91.262,
+    "accepted": 94,
+    "drafted": 103
+  },
+  {
+    "prompt": "Unseen SQL (PostgreSQL Window CTE)",
+    "config": "1. Standalone 14B Baseline",
+    "gen_ts": 37.5,
+    "speedup": 1.0,
+    "acc_rate": null,
+    "accepted": null,
+    "drafted": null
+  },
+  {
+    "prompt": "Unseen SQL (PostgreSQL Window CTE)",
+    "config": "2. 14B + 0.5B (draft-simple, K=3)",
+    "gen_ts": 55.9,
+    "speedup": 1.49,
+    "acc_rate": 78.76100000000001,
+    "accepted": 89,
+    "drafted": 113
+  },
+  {
+    "prompt": "Unseen SQL (PostgreSQL Window CTE)",
+    "config": "3. 14B + 0.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 56.4,
+    "speedup": 1.5,
+    "acc_rate": 80.0,
+    "accepted": 96,
+    "drafted": 120
+  },
+  {
+    "prompt": "Unseen SQL (PostgreSQL Window CTE)",
+    "config": "4. 14B + 1.5B (draft-simple, K=3)",
+    "gen_ts": 51.5,
+    "speedup": 1.37,
+    "acc_rate": 85.047,
+    "accepted": 91,
+    "drafted": 107
+  },
+  {
+    "prompt": "Unseen SQL (PostgreSQL Window CTE)",
+    "config": "5. 14B + 1.5B (draft-simple, K=4)",
+    "gen_ts": 49.6,
+    "speedup": 1.32,
+    "acc_rate": 82.906,
+    "accepted": 97,
+    "drafted": 117
+  },
+  {
+    "prompt": "Unseen SQL (PostgreSQL Window CTE)",
+    "config": "6. 14B + 1.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 48.7,
+    "speedup": 1.3,
+    "acc_rate": 80.342,
+    "accepted": 94,
+    "drafted": 117
+  },
+  {
+    "prompt": "Unseen Refactor/Edit (Code Transformation)",
+    "config": "1. Standalone 14B Baseline",
+    "gen_ts": 37.4,
+    "speedup": 1.0,
+    "acc_rate": null,
+    "accepted": null,
+    "drafted": null
+  },
+  {
+    "prompt": "Unseen Refactor/Edit (Code Transformation)",
+    "config": "2. 14B + 0.5B (draft-simple, K=3)",
+    "gen_ts": 54.6,
+    "speedup": 1.46,
+    "acc_rate": 76.522,
+    "accepted": 88,
+    "drafted": 115
+  },
+  {
+    "prompt": "Unseen Refactor/Edit (Code Transformation)",
+    "config": "3. 14B + 0.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 52.0,
+    "speedup": 1.39,
+    "acc_rate": 85.294,
+    "accepted": 87,
+    "drafted": 102
+  },
+  {
+    "prompt": "Unseen Refactor/Edit (Code Transformation)",
+    "config": "4. 14B + 1.5B (draft-simple, K=3)",
+    "gen_ts": 49.9,
+    "speedup": 1.33,
+    "acc_rate": 82.569,
+    "accepted": 90,
+    "drafted": 109
+  },
+  {
+    "prompt": "Unseen Refactor/Edit (Code Transformation)",
+    "config": "5. 14B + 1.5B (draft-simple, K=4)",
+    "gen_ts": 45.4,
+    "speedup": 1.21,
+    "acc_rate": 74.21900000000001,
+    "accepted": 95,
+    "drafted": 128
+  },
+  {
+    "prompt": "Unseen Refactor/Edit (Code Transformation)",
+    "config": "6. 14B + 1.5B (ngram+draft, K=5, p=0.70)",
+    "gen_ts": 50.8,
+    "speedup": 1.36,
+    "acc_rate": 91.509,
+    "accepted": 97,
+    "drafted": 106
+  }
+]
