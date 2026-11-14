@@ -12,7 +12,7 @@ if ($Mode -ne "moe35b") {
     $Host.UI.RawUI.WindowTitle = "6700XT-Afterburner: Dual-Engine Speculative Vulkan Server (RX 6700 XT)"
     if ($Mode -eq "speculative14b") {
         $TargetModel = Join-Path $RootDir "Models\Qwen2.5-Coder-14B-Instruct-GGUF\qwen2.5-coder-14b-instruct-q4_k_m.gguf"
-        $DraftModel  = Join-Path $RootDir "Models\Qwen2.5-Coder-0.5B-L18-Healed\Qwen2.5-Coder-0.5B-L18-Healed-Q4_0.gguf"
+        $DraftModel  = Join-Path $RootDir "Models\Qwen2.5-Coder-0.5B-Instruct\Qwen2.5-Coder-0.5B-Instruct-Q4_0.gguf"
     } else {
         $TargetModel = Join-Path $RootDir "Models\Qwen2.5-Coder-7B-Instruct-GGUF\qwen2.5-coder-7b-instruct-q4_k_m.gguf"
         if ($Mode -eq "healed14l") {

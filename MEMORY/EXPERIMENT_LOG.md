@@ -228,3 +228,15 @@
   3. **32,768-Vocab Chat Template Token Split Root Cause & Fix:**
      - `Qwen2.5-Coder` encodes `"assistant"` in `<|im_start|>assistant\n` as token ID `77091` (`> 32753`). Naive 32k vocab pruning dropped `77091`, splitting `"assistant"` into `[395, 11202]`.
      - Distilling the 32k-vocab `Healed 14L 96MB` and `Dory-Looped 19L 96MB` models directly on 32k-tokenized chat sequences (`94.29%` and `95.16%` teacher agreement) restored clean Python function generation at **`535.9 – 681.3 tokens/sec`** standalone!
+
+
+## EXP-015: Blind Held-Out Verification Audit & Dynamic Confidence / N-Gram Speculation
+- **Date / Time:** 2026-11-14T03:13:06-06:00
+- **Target:** Audit generalization of pruned/distilled draft models (`Healed 18L`, `Healed 14L`, `Dory-Looped 19L`) vs. `Stock Untouched 0.5B (24L)` on unseen prompts (`tools/verify_blind_heldout.py`) never present in `CALIBRATION_TEXTS`, and test `llama.cpp` multi-stage `--spec-type ngram-simple,draft-simple` with `--spec-draft-p-min`.
+- **Findings:**
+  1. **Calibration Overfitting Identified on 10-Layer Cuts (`Healed 14L` & `Dory 19L`):**
+     - On an unseen Python prompt (`"Write a Python class for a thread-safe LRU cache using collections.OrderedDict and threading.Lock"`), `Standalone 14B` ran at `37.4 – 38.2 t/s`.
+     - **`Stock Untouched 0.5B (24L)`** generalized cleanly at **`55.0 t/s` (`+44%` speedup, `74.4%` acceptance, 87/117 tokens)**, and **`56.6 t/s` (`+51.3%` speedup, `85.6%` acceptance, 95/111 tokens)** with `--spec-type ngram-simple,draft-simple --spec-draft-n-max 6 --spec-draft-p-min 0.70`.
+     - **`Healed 18L` (6 layers cut)** generalized moderately at **`48.1 t/s` (`+26%` speedup, `57.1%` acceptance)**.
+     - **`Healed 14L` (`37.0 t/s`, `34.2%` acceptance)** and **`Dory-Looped 19L` (`34.7 t/s`, `32.1%` acceptance)** overfit to the 4 calibration prompts and did not beat standalone 14B on unseen code because 10 dropped layers cannot be recovered across general code domains from 4 calibration paragraphs.
+  2. **Production Default Updated:** Set `start_local_server.ps1 -Mode speculative14b` to use the verified `Stock Untouched 0.5B (24L)` drafter (`Qwen2.5-Coder-0.5B-Instruct-Q4_0.gguf`).
