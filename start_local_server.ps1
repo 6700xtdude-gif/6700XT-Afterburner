@@ -1,17 +1,21 @@
 # start_local_server.ps1 - Launch Vulkan Accelerated Local Server for 6700XT-Afterburner
 param(
-    [ValidateSet("speculative", "moe35b")]
-    [string]$Mode = "speculative",
+    [ValidateSet("speculative", "healed18l", "moe35b")]
+    [string]$Mode = "healed18l",
     [int]$K = 3
 )
 
 $RootDir = $PSScriptRoot
 $BinDir  = Join-Path $RootDir "bin\vulkan"
 
-if ($Mode -eq "speculative") {
+if ($Mode -eq "speculative" -or $Mode -eq "healed18l") {
     $Host.UI.RawUI.WindowTitle = "6700XT-Afterburner: Dual-Engine Speculative Vulkan Server (RX 6700 XT)"
     $TargetModel = Join-Path $RootDir "Models\Qwen2.5-Coder-7B-Instruct-GGUF\qwen2.5-coder-7b-instruct-q4_k_m.gguf"
-    $DraftModel  = Join-Path $RootDir "Models\Qwen2.5-Coder-0.5B-Instruct\Qwen2.5-Coder-0.5B-Instruct-Q4_0.gguf"
+    if ($Mode -eq "healed18l") {
+        $DraftModel = Join-Path $RootDir "Models\Qwen2.5-Coder-0.5B-L18-Healed\Qwen2.5-Coder-0.5B-L18-Healed-Q4_0.gguf"
+    } else {
+        $DraftModel = Join-Path $RootDir "Models\Qwen2.5-Coder-0.5B-Instruct\Qwen2.5-Coder-0.5B-Instruct-Q4_0.gguf"
+    }
 
     if (-not (Test-Path $TargetModel)) {
         Write-Error "Target model file not found at: $TargetModel"

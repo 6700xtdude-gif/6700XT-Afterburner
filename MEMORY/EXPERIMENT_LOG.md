@@ -172,3 +172,20 @@
 - **Speculative decoding delivers a decisive 1.20x to 1.33x throughput improvement (+20% to +33% speedup)** on structured agent tasks, tool calling, and code syntax where acceptance rate is high ($\alpha \ge 77\%$).
 - **Optimal Draft Horizon:** $K=2$ and $K=3$ represent the sweet spot on Navi 22. At $K=4$ on low-predictability prose ($\alpha < 65\%$), drafting overhead slightly exceeds verification savings.
 - Output generation is byte-for-byte identical, guaranteeing zero degradation in reasoning quality.
+
+
+## EXP-011: Issue #1 Resolution — ShortGPT Layer Profiling & Seam Knowledge Distillation Healing
+- **Date / Time:** 2026-11-14T01:27:00-06:00
+- **Target:** Diagnose why zero-shot layer pruning (`24L -> 14L`, dropping `[8..17]`) degraded speculative acceptance, identify the true redundant layer valley via ShortGPT Block Influence (`1 - cos_sim`), and heal the pruned model via Knowledge Distillation (`KL + Hidden Cosine Loss`).
+- **Findings:**
+  1. **Neural Layer Importance Profile (`scripts/profile_layer_importance.py`):**
+     - `blk.16` (`BI = 0.0941`, Rank #19) and `blk.14` (`BI = 0.0735`) were inside the original `[8..17]` cut and caused severe logit drift (`38.94%` teacher agreement, `KL = 269.41`).
+     - Greedy cumulative search identified `[9, 10, 11, 12, 13, 18]` as the true redundant valley (`24L -> 18L`, `-25%` transformer depth), lifting pre-healed teacher agreement to `73.22%` (`KL = 93.58`).
+  2. **Seam Knowledge Distillation Healing (`scripts/heal_draft_model.py`):**
+     - Tuning `o_proj`, `down_proj`, and `LayerNorm` across the seam layers (`layers 8, 9, 10, 13, 14, 17 + norm`) for 8 epochs (`lr=5e-5`, `T=1.5` Top-128 KL + Cosine Hidden-State Loss) raised teacher Top-1 agreement from **`73.22%` to `97.82%`** and reduced KL divergence from **`93.58` down to `1.71`**!
+  3. **Live RX 6700 XT Vulkan Speculative Benchmark (`Qwen2.5-Coder-0.5B-L18-Healed-Q4_0.gguf`):**
+     - **Old Unhealed 14L (`Q2_0`):** `0.0%` acceptance (`17.0 t/s`)
+     - **Old Unhealed 14L (`Q4_0`):** `21.2%` acceptance (`45.8 t/s`)
+     - **Healed 18L (`Q4_0`, Python Code $K=3$):** **`63.4%` acceptance (`77.3 t/s`, beating 71.4 t/s standalone 7B)**
+     - **Healed 18L (`Q4_0`, Structured JSON $K=3$):** **`88.5%` acceptance (`96.7 t/s`, 1,313.7 ms — NEW ALL-TIME RECORD, 1.35x speedup over standalone 7B!)**
+     - **Healed 18L (`Q4_0`, Structured JSON $K=4$):** **`89.2%` acceptance (`95.4 t/s`, mean accepted burst length = 4.54 tokens/pass)**

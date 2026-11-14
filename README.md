@@ -26,13 +26,21 @@ Autoregressive LLM generation (`batch_size = 1`) is strictly memory-bandwidth bo
 By running `Qwen2.5-Coder-0.5B-Instruct-Q4_0` (330 MB) alongside `Qwen2.5-Coder-7B-Instruct-Q4_K_M` (4.68 GB)—consuming just **~5.2 GB of 12 GB VRAM combined**—the 0.5B model rapidly drafts $K = 2\text{--}3$ tokens, and the 7B model verifies all of them in a **single parallel forward pass** (1 weight read instead of 3–4).
 * **Result:** Up to **95.5 tokens/sec (+33.2%)** on JSON/tool-calling and **85.8 tokens/sec (+20.2%)** on Python code, with **100% mathematically identical output** to standalone 7B.
 
-### 2. The 96 MB Infinity Cache Surgery Experiment (895.4 tokens/sec)
-We also built a two-stage model surgery pipeline ([scripts/vocab_prune.py](scripts/vocab_prune.py) + [scripts/layer_prune.py](scripts/layer_prune.py)) to compress Qwen 2.5 Coder 0.5B so it fits **100% inside the RX 6700 XT's 96 MB Infinity Cache (L3 SRAM)**:
-1. **Vocabulary Slicing (`151,936 -> 32,768` tokens):** Strips rare multilingual tokens while preserving all special tokens, byte fallbacks, and top 32k code/English tokens, plus generating a 128 KB `draft_to_verifier_id.bin` lookup table.
-2. **Layer Slicing (`24 -> 14` layers):** Drops 10 intermediate blocks (`layers 8..17`) and re-indexes `[0..7, 18..23] -> [0..13]`.
-3. **Quantization (`Q2_0`, 85.9 MiB):**
-   * **Standalone Speed:** Hits **895.4 tokens/sec** generation and **16,875 tokens/sec** prompt processing on the RX 6700 XT!
-   * **The Zero-Shot Surgery Discovery (See Issue #1):** While the 14-layer pruned model runs at nearly 900 t/s standalone, removing 10 layers *without* a post-pruning LoRA / knowledge distillation "healing" pass shifts its output logits enough that the 7B verifier rejects its drafts ($\alpha \to 0\%$). Using the intact 24-layer `0.5B-Q4_0` (330 MB) drafter immediately restores **78.8%–94.3% acceptance**. Healing the 14-layer 86 MB model via distillation is tracked as our next milestone!
+### 2. Healing the Surgery: ShortGPT Profiling + Knowledge Distillation (**96.7 tokens/sec Record!**)
+Initially, zero-shot layer pruning (`24 -> 14` layers, blindly dropping `[8..17]` in `Q2_0`) achieved **895.4 tokens/sec** standalone inside the **96 MB Infinity Cache**, but suffered `0%` speculative acceptance (`21.2%` in `Q4_0`) because cutting `blk.16` (`BI = 0.0941`) shifted output logits away from the 7B verifier (`KL = 269.41`).
+
+To solve [Issue #1](https://github.com/6700xtdude-gif/6700XT-Afterburner/issues/1), we built a two-part surgical healing pipeline:
+1. **Neural Layer Importance Profiler ([`scripts/profile_layer_importance.py`](scripts/profile_layer_importance.py)):**
+   * Measured ShortGPT Block Influence (`1 - cos_sim(X_in, X_out)`) and Leave-One-Out token agreement across all 24 layers, identifying `[9, 10, 11, 12, 13, 18]` as the true low-influence redundant valley (`24 -> 18` layers, `-25%` depth).
+2. **Seam Knowledge Distillation Healer ([`scripts/heal_draft_model.py`](scripts/heal_draft_model.py)):**
+   * Tuned the seam projections (`o_proj`, `down_proj`, `LayerNorm`) using Top-128 Logit KL-Divergence + Hidden-State Cosine Alignment against the 24-layer Teacher, lifting teacher token agreement from **`38.94%` (naive 14L) -> `73.22%` (unhealed 18L) -> `97.82%` (healed 18L, `KL = 1.71`)**!
+
+| Draft Engine Surgery State | Teacher KL Div | Speculative Acceptance ($\alpha$) | RX 6700 XT Speed (JSON / Code) | vs. Standalone 7B (`71.7 t/s`) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Unhealed 14L (`Q2_0`, `[8..17]` cut)** | 269.41 | 0.0% | 17.0 t/s | 0.24x (Failed) |
+| **Unhealed 14L (`Q4_0`, `[8..17]` cut)** | 269.41 | 21.2% | 45.8 t/s | 0.64x (Slowdown) |
+| **Healed 18L (`Q4_0`, BI + Distillation, $K=3$)** | **1.71** | **88.5% (JSON) / 63.4% (Code)** | **96.7 t/s (JSON) / 77.3 t/s (Code)** | **1.35x (+34.9% Peak Record!)** |
+| **Healed 18L (`Q4_0`, BI + Distillation, $K=4$)** | **1.71** | **89.2% (mean burst = 4.54 tok)** | **95.4 t/s (JSON)** | **1.33x (+33.1%)** |
 
 ### 3. Cross-Generation Tokenizer Barrier (Qwen 2.5 vs. Qwen 3.5/3.6)
 When pairing `Qwen3.6-35B-A3B` (248k `qwen35` vocabulary) with `Qwen2.5-0.5B` (152k `qwen2` vocabulary), stock `llama.cpp` rejects speculation (`common_specu: the target and draft vocabs are not compatible`). Bridging Qwen 2.5 drafters to Qwen 3.6 MoE targets requires runtime token ID remapping via `draft_to_verifier_id.bin`.
