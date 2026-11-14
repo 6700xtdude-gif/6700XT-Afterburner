@@ -189,3 +189,28 @@
      - **Healed 18L (`Q4_0`, Python Code $K=3$):** **`63.4%` acceptance (`77.3 t/s`, beating 71.4 t/s standalone 7B)**
      - **Healed 18L (`Q4_0`, Structured JSON $K=3$):** **`88.5%` acceptance (`96.7 t/s`, 1,313.7 ms — NEW ALL-TIME RECORD, 1.35x speedup over standalone 7B!)**
      - **Healed 18L (`Q4_0`, Structured JSON $K=4$):** **`89.2%` acceptance (`95.4 t/s`, mean accepted burst length = 4.54 tokens/pass)**
+
+
+## EXP-012: 14B Full-VRAM Dual-Engine Speculative Benchmark (`Qwen2.5-Coder-14B-Instruct-Q4_K_M`)
+- **Date / Time:** 2026-11-14T02:07:52-06:00
+- **Target:** Test `Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf` (8.37 GiB, 48 layers, 14.77B parameters) 100% resident in RX 6700 XT 12 GB VRAM paired with `Healed 18L 0.5B` (282 MiB) and `Unpruned 24L 0.5B` (330 MiB) draft models.
+- **Findings:**
+  1. **WDDM VRAM Contention Lesson:** When an orphaned 7B `llama-server.exe` process held 4.98 GB of VRAM simultaneously, loading the 8.37 GiB 14B model pushed total allocation to ~13.6 GB, triggering silent Windows WDDM Shared GPU Memory paging over PCIe (`7.5 t/s`). Terminating the background server tree freed the full 12 GB buffer (~9.45 GiB total active footprint).
+  2. **Clean 100% VRAM Benchmark Results (`MEMORY/BENCHMARK_14B_RESULTS.json`):**
+     - **Standalone 14B (`Q4_K_M`, `-ngl 99`):** **`37.4 – 37.5 tokens/sec`** (`pp = 168.9 – 197.0 t/s`).
+     - **14B + Healed 18L 0.5B ($K=3$, Structured JSON):** **`63.0 t/s` -> `1.68x speedup (+68.4%)`, $\alpha = 86.7\%$ (91/105)**
+     - **14B + Healed 18L 0.5B ($K=4$, Structured JSON):** **`63.9 t/s` -> `1.71x speedup (+70.9% RECORD SPEEDUP RATIO!)`, $\alpha = 89.2\%$ (99/111)**
+     - **14B + Unpruned 24L 0.5B ($K=3$, Python Code):** **`60.9 t/s` -> `1.62x speedup (+62.4%)`, $\alpha = 85.0\%$ (91/107)**
+     - **14B + Healed 18L 0.5B ($K=3$, Python Code):** **`51.2 t/s` -> `1.37x speedup (+36.5%)`, $\alpha = 62.9\%$ (83/132)**
+
+
+## EXP-013: Dory-Style Latent-Recurrent Layer Looping for the 96 MB Infinity Cache Model
+- **Date / Time:** 2026-11-14T02:13:46-06:00
+- **Target:** Evaluate whether NVIDIA Dory1.0-4B style middle-layer looping + input anchor re-injection (`scripts/test_looped_draft.py`) can improve output alignment of the 14-layer (<90 MB L3-resident) surgical draft model without adding physical weight memory.
+- **Findings:**
+  1. Splitting the 14 ShortGPT-selected physical layers (`[0..7, 15, 16, 17, 20, 22, 23]`) into a 5-layer Input Block (`0..4`), a 5-layer Recurrent Block (`5..9`, looped $2\times$ with a learnable 3.5 KB Dory anchor re-injection gate `loop_alpha` + `loop_norm`), and a 4-layer Output Block (`10..13`) yields **19 effective transformer layers** from **14 physical layers** (`344,910,720` vs `344,908,928` unique parameters).
+  2. **Empirical Teacher Alignment (vs. 24-Layer Teacher):**
+     - **Unhealed Linear 14L (14 passes):** `52.87%` Top-1 Agreement (`KL = 273.56`)
+     - **Distilled Linear 14L (14 passes):** `94.43%` Top-1 Agreement (`KL = 8.35`)
+     - **Distilled Dory-Looped 14L (19 effective passes, same 14L weights):** **`95.30%` Top-1 Agreement (`KL = 6.78`, -18.8% lower KL divergence!)**
+  3. **Hardware Synergy on Navi 22:** While looping a 3.7 GB model (Dory-4B) overflows L3 cache and re-streams weights from GDDR6 VRAM (2.4x slowdown), looping a <90 MB 14-layer model inside the **96 MB Infinity Cache** reads hot L3 SRAM cache lines at >1 TB/s.
