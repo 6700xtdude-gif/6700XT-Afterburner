@@ -360,6 +360,36 @@
      - Formulated 4-phase benchmark matrix: 64GB System-Managed vs 64GB Manual Pagefile (96 GB / 192 GB) vs 32GB baseline.
 - **Status:** COMPLETE. Pipeline operational; ready for live baseline execution.
 
+## EXP-023: Clean Head-to-Head Benchmarking — Qwen 3.8 27B vs Qwen 3.6 35B MoE on 64GB Host Memory
+- **Date / Time:** 2026-11-14T15:05:00-06:00
+- **Target:** Benchmark `Qwen 3.8 27B UD-Q4_K_XL` (dense hybrid) and `Qwen 3.6 35B A3B UD-Q4_K_XL` (sparse MoE hybrid) on AMD Radeon RX 6700 XT 12GB + Ryzen 5 5600 + 64GB DDR4-3200 under clean system state.
+- **Results:**
+  1. **Qwen 3.8 27B UD-Q4_K_XL (`bench/reports/benchmark_20261114_150005.md`):**
+     - Overall Median Decode: **6.13 tokens/sec** (Structured JSON: 6.45 t/s, Code: 6.15 t/s, Reasoning: 5.83 t/s, Smoke: 5.06 t/s).
+     - MTP Speculative Acceptance: 68.4% median.
+     - Peak Process RSS: **22,098.5 MB (~21.6 GB)**.
+     - Bottleneck: Dense weights stream through DDR4 at ~32 GiB/s every token, capping speed at ~6 t/s.
+  2. **Qwen 3.6 35B A3B UD-Q4_K_XL (`bench/reports/benchmark_20261114_150427.md`):**
+     - Overall Median Decode: **16.39 tokens/sec** (2.67x faster than dense 27B!).
+     - Structured JSON: 16.47 t/s, Code: 16.47 t/s, Reasoning: 16.39 t/s, Smoke: 16.31 t/s.
+     - TTFT (Cached Prompts): **122.5 ms**.
+     - Peak Process RSS: **21,469.0 MB (~21.5 GB)**.
+     - Architectural Insight: Only 8 of 256 experts active per token (~3.5 GB active parameter reads), drastically lowering DDR4 memory bus pressure.
+- **Status:** COMPLETE and operational.
+
+## EXP-024: Post-Reboot Pagefile Evaluation — System-Managed vs Fixed Manual Pagefile
+- **Date / Time:** 2026-11-14T15:54:00-06:00
+- **Target:** Benchmark `Qwen 3.8 27B UD-Q4_K_XL` (hybrid offload, 45 layers VRAM, 20 layers DDR4) following system reboot with Windows Pagefile set to "System-Managed" (`AutomaticManagedPagefile = True`).
+- **Results (`bench/reports/benchmark_20261114_155347.md`):**
+  - Overall Median Decode: **5.77 tokens/sec** (vs **6.13 tokens/sec** under fixed manual 32GB/96GB pagefile).
+  - Structured JSON: **6.46 t/s** (MTP accept: 82.3%)
+  - Code Generation: **5.90 t/s** (MTP accept: 70.3%)
+  - Technical Reasoning: **5.36 t/s** (MTP accept: 61.0%)
+  - Smoke Sanity: **4.72 t/s** (MTP accept: 46.9%)
+  - Peak Process RSS: **21,523.4 MB (~21.5 GB)**.
+  - Server Status: Left active at `http://127.0.0.1:8080/v1` with 64k context (`n_ctx = 65536`) for live user interaction with Pi coding agent (`start_pi_afterburner.ps1`).
+- **Status:** COMPLETE and operational. Hybrid server running.
+
 ## EXP-023: Pi Coding Agent Harness Integration, Unsandboxed Host Tools & End-to-End Context Consistency
 - **Date / Time:** 2026-11-14T14:15:00-06:00
 - **Target:** Install, configure, and verify the Pi coding agent harness (`@earendil-works/pi-coding-agent` v1.5.2) against local 6700XT-Afterburner models (`http://127.0.0.1:8080/v1`) with full host tool execution (PowerShell, Bash, web research) and 64k context window.
