@@ -214,3 +214,17 @@
      - **Distilled Linear 14L (14 passes):** `94.43%` Top-1 Agreement (`KL = 8.35`)
      - **Distilled Dory-Looped 14L (19 effective passes, same 14L weights):** **`95.30%` Top-1 Agreement (`KL = 6.78`, -18.8% lower KL divergence!)**
   3. **Hardware Synergy on Navi 22:** While looping a 3.7 GB model (Dory-4B) overflows L3 cache and re-streams weights from GDDR6 VRAM (2.4x slowdown), looping a <90 MB 14-layer model inside the **96 MB Infinity Cache** reads hot L3 SRAM cache lines at >1 TB/s.
+
+
+## EXP-014: Live Vulkan Verification of Healed 14L, Dory-Looped 19L, and 32k-Vocab Chat Distillation
+- **Date / Time:** 2026-11-14T02:48:44-06:00
+- **Target:** Export GGUF checkpoints for `Qwen2.5-Coder-0.5B-L14-Healed` (14 layers) and `Qwen2.5-Coder-0.5B-Dory19L-Healed` (14 physical layers -> 19 effective layers via 2x weight-tied middle loop `[5..9]`), benchmark both against 7B and 14B verifiers on RX 6700 XT Vulkan (`MEMORY/BENCHMARK_DORY_MATRIX.json`), and resolve the 32,768-vocab chat template anomaly (`scripts/distill_32k_dory_and_14l.py`).
+- **Findings:**
+  1. **New All-Time Throughput Records on `Healed 14L (Q4_0)` (`243 MiB`):**
+     - **7B + Healed 14L ($K=3$, Structured JSON):** **`99.8 tokens/sec` (`1.39x` speedup, `88.5%` acceptance)** — beating our previous `96.7 t/s` 18L record!
+     - **14B + Healed 14L ($K=3$, Structured JSON):** **`64.6 tokens/sec` (`1.73x` speedup, `86.7%` acceptance)** — beating our previous `63.9 t/s` 14B record!
+  2. **Silicon Proof of Dory Layer Looping on Code Generation (`Dory-Looped 19L` vs. `Healed 14L`):**
+     - Using the **exact same 14 physical layers** (`KEEP_14`), looping layers `5..9` twice in `Dory-Looped 19L` lifted **7B Python Code acceptance from `49.3%` (`67.9 t/s`) -> `56.4%` (`70.9 t/s`, +7.1% acceptance and +3.0 t/s faster)**, and lifted **14B Python Code acceptance from `46.5%` -> `48.1%`**.
+  3. **32,768-Vocab Chat Template Token Split Root Cause & Fix:**
+     - `Qwen2.5-Coder` encodes `"assistant"` in `<|im_start|>assistant\n` as token ID `77091` (`> 32753`). Naive 32k vocab pruning dropped `77091`, splitting `"assistant"` into `[395, 11202]`.
+     - Distilling the 32k-vocab `Healed 14L 96MB` and `Dory-Looped 19L 96MB` models directly on 32k-tokenized chat sequences (`94.29%` and `95.16%` teacher agreement) restored clean Python function generation at **`535.9 – 681.3 tokens/sec`** standalone!

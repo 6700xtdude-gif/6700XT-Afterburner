@@ -55,8 +55,8 @@ Because speculative decoding amortizes target weight reads across multiple draft
 ### 4. Dory-Style Latent-Recurrent Layer Looping inside the 96 MB Infinity Cache
 Inspired by NVIDIA's **Dory1.0-4B** looped transformer, [`scripts/test_looped_draft.py`](scripts/test_looped_draft.py) converts our 14-layer (<90 MB `Q2_0`) Infinity Cache architecture into a **19-effective-layer Looped Transformer** by looping the 5 middle layers (`5..9`) twice with a 3.5 KB gated anchor re-injection (`loop_alpha` + `loop_norm`):
 * **Unhealed Linear 14L (14 Passes):** `52.87%` Teacher Agreement (`KL = 273.56`)
-* **Distilled Linear 14L (14 Passes):** `94.43%` Teacher Agreement (`KL = 8.35`)
-* **Distilled Dory-Looped 14L (19 Effective Passes, Same 14L Physical Weights):** **`95.30%` Teacher Agreement (`KL = 6.78`, -18.8% lower KL divergence!)**
+* **Distilled Linear 14L (14 Passes):** `94.43%` Teacher Agreement (`KL = 8.35`) — **Hits `99.8 t/s` (`1.39x`) on 7B JSON and `64.6 t/s` (`1.73x`) on 14B JSON!**
+* **Distilled Dory-Looped 14L (19 Effective Passes, Same 14L Physical Weights):** **`95.30%` Teacher Agreement (`KL = 6.78`, -18.8% lower KL divergence)** — **Lifts 7B Python Code acceptance from `49.3%` (`67.9 t/s`) to `56.4%` (`70.9 t/s`, +7.1% acceptance) using the exact same 14 physical layers!**
 
 ### 5. Cross-Generation Tokenizer Barrier (Qwen 2.5 vs. Qwen 3.5/3.6)
 When pairing `Qwen3.6-35B-A3B` (248k `qwen35` vocabulary) with `Qwen2.5-0.5B` (152k `qwen2` vocabulary), stock `llama.cpp` rejects speculation (`common_specu: the target and draft vocabs are not compatible`). Bridging Qwen 2.5 drafters to Qwen 3.6 MoE targets requires runtime token ID remapping via `draft_to_verifier_id.bin`.
