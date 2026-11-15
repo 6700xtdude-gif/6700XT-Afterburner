@@ -93,16 +93,28 @@ When pairing `Qwen3.6-35B-A3B` (248k `qwen35` vocabulary) with `Qwen2.5-0.5B` (1
 
 ### 7. High-Context 27B/35B Inference & Project 9696XT Audit
 Empirical audit of high-context, large-parameter models on the RX 6700 XT 12GB + Ryzen 5 5600:
-* **100% VRAM 27B Saturation:** [`Qwen3.8-27B-IQ2_M`](file:///c:/Users/6700XT/Documents/Strata/Models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-IQ2_M.gguf) with native MTP speculation fits entirely inside 12 GB GDDR6 (65/65 layers on GPU), delivering **`22.61 tokens/sec`** decode (JSON **24.2 t/s**, Code **23.7 t/s**) with 160 ms TTFT.
-* **Sparse MoE Hybrid Offload:** `Qwen3.6-35B-A3B UD-Q4_K_XL` (Alex's model) achieves **`16.78 tokens/sec`** on Vulkan with 115–124 ms TTFT, streaming only ~3.5 GB active parameters/token.
-* **The 2-DIMM Memory Controller Advantage:** On the Ryzen 5 5600, running 2 single-rank DIMMs (1 DPC, 1T command rate) yields **`7.54 tokens/sec`** on dense hybrid offload—a **+23.0% speedup** over 4-DIMM kits (**6.13 t/s**).
+* **100% VRAM 27B Saturation:** `Qwen3.8-27B-IQ2_M` with native MTP speculation fits entirely inside 12 GB GDDR6 (65/65 layers on GPU), delivering **`22.26–22.61 tokens/sec`** decode (JSON **24.25 t/s**, Code **23.15–23.7 t/s**) with 160 ms TTFT.
+* **Sparse MoE Hybrid Offload:** `Qwen3.6-35B-A3B UD-Q4_K_XL` (Alex's model) achieves **`16.78 tokens/sec`** on 32 GB 2-DIMM and **`16.26 tokens/sec`** on 64 GB 2-DIMM (with ~40 GB free RAM headroom) on Vulkan with 115–124 ms TTFT, streaming only ~3.5 GB active parameters/token.
+* **The 2-DIMM Memory Controller Advantage:** On the Ryzen 5 5600, running 2 single-rank DIMMs (`2x16GB`, 1 DPC, 1T command rate) yields **`7.54 tokens/sec`** on dense 27B hybrid offload—a **+23.0% speedup** over 4-DIMM kits (**6.13 t/s**)—while dual-rank `2x32GB` (64 GB 2-DIMM) runs at **`5.50 t/s`** with 38+ GB free physical margin for 64k+ context workloads.
 * Full report: [`docs/PROJECT_9696XT_REPORT.md`](docs/PROJECT_9696XT_REPORT.md).
+
+---
+
+### 8. AfterBurner Local Control Center, Pi Agent & Windows Launchers
+Zero-dependency local tooling built specifically for native Windows 11 administration on the RX 6700 XT (`http://127.0.0.1:8090`):
+* **AfterBurner Telemetry Dashboard ([`dashboard/server.py`](dashboard/server.py), [`dashboard/index.html`](dashboard/index.html), [`Launch_Dashboard.bat`](Launch_Dashboard.bat)):** Real-time local web control panel bound for localhost/LAN access with GPU/VRAM/KV-cache telemetry, locked-dimension 4-mode chart tiles (`BAR`, `GAUGE`, `GRAPH`, `HIST`), prompt staging with spellcheck, and browser **Auto-Speak TTS**.
+* **Windows-Native Pi Agent & Server Launchers ([`Launch_Pi.bat`](Launch_Pi.bat), [`start_local_server.ps1`](start_local_server.ps1), [`start_pi_afterburner.ps1`](start_pi_afterburner.ps1), [`scripts/launch_afterburner_pi.ps1`](scripts/launch_afterburner_pi.ps1)):** Windows PowerShell and `.bat` launchers running `llama-server.exe` (`-Mode qwen27b_vram`) at **65,536 (64k) context** with `--reasoning-budget 256` (preserving inter-turn `<think>` traces without context runaway).
+* **CoreAudio Device Switcher ([`scripts/switch_audio_mode.ps1`](scripts/switch_audio_mode.ps1)):** Windows COM toggle isolating default playback/communications to a Bluetooth headset or switching back to monitor audio.
 
 ---
 
 ## 🛠️ Repository Structure
 
-* [`start_local_server.ps1`](start_local_server.ps1) — Production PowerShell launcher for the RX 6700 XT Vulkan `llama-server` (`-Mode speculative` for 7B+0.5B, or `-Mode speculative14b` for 14B+0.5B using stock drafter).
+* [`start_local_server.ps1`](start_local_server.ps1) — Production Windows PowerShell launcher for the RX 6700 XT Vulkan `llama-server.exe` (`-Mode qwen27b_vram`, `qwen27b`, `moe35b`, `speculative`, or `speculative14b`).
+* [`Launch_Dashboard.bat`](Launch_Dashboard.bat) & [`dashboard/`](dashboard/) — Windows launcher and zero-dependency Python/HTML local telemetry dashboard + Pi voice/prompt control center.
+* [`Launch_Pi.bat`](Launch_Pi.bat), [`start_pi_afterburner.ps1`](start_pi_afterburner.ps1) & [`scripts/launch_afterburner_pi.ps1`](scripts/launch_afterburner_pi.ps1) — Windows launchers for the Pi coding agent connected to `http://127.0.0.1:8080/v1`.
+* [`scripts/switch_audio_mode.ps1`](scripts/switch_audio_mode.ps1) — Windows CoreAudio COM toggle for headset vs. monitor audio routing.
+* [`tests/test_dashboard_server.py`](tests/test_dashboard_server.py) — Unit tests for the AfterBurner telemetry dashboard server.
 * [`tools/benchmark_speculative_suite.py`](tools/benchmark_speculative_suite.py) — Automated benchmark suite with multi-run variance testing (warmup + 3 runs, mean and min/max spread) across Code, JSON, and Reasoning.
 * [`tools/verify_blind_heldout.py`](tools/verify_blind_heldout.py) — Rigorous blind generalization audit testing stock vs surgical models across unseen held-out tasks.
 * [`tools/llm_bridge_mcp.py`](tools/llm_bridge_mcp.py) — Zero-dependency MCP server bridging local RX 6700 XT Vulkan models into agentic IDEs.
