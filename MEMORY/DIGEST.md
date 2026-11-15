@@ -18,6 +18,20 @@ Durable state lives in git, not in any harness's chat database.
 - **Reimage runbook:** `docs/REIMAGE_RUNBOOK.md`.
 - **Vendored-tree rule:** `docs/VENDORED_TREES.md` and `patches/` — local llama.cpp edits are exported, never left dirty.
 
+## Next Actions (2026-11-15)
+
+**Nothing executes until the user says go.** Full plan: `docs/PI_HARNESS_PLAN.md`.
+
+1. **Reboot — not a reimage.** Then fix the Pi harness: standing instructions at `~/.pi/agent/AGENTS.md` (does not exist today), load timeout raised from 35 s to 180 s, a real completion probe instead of a `/health` check, and one launcher instead of three (`Launch_Pi.bat`, `start_pi_afterburner.ps1`, `scripts/launch_afterburner_pi.ps1` all start Pi today).
+2. **Read-only smoke test** — `scripts/smoke_test.ps1` (to be created): computer name and OS build, deduplicated System event log, printer list plus TCP reachability, local model `/v1/models` and one completion.
+3. **Number provenance** — `895 t/s` in `README.md` and three docs has no artifact. Mark unverified in place, then extend `memory_build.py`'s unsourced check past `DIGEST.md` to `README.md` and `docs/`.
+4. **Untested configuration** — drafter on CPU, verifier on GPU. The only memory-tier placement not yet measured, and the one that serves the goal of two models across any silicon.
+5. **96 GB install** — still pending, after the reboot work.
+
+## Infinity Cache — closed, do not reopen
+
+Falsified by our own data, not by argument: the 91.1 MB `Q2_0` ran **3.1x slower** than the 149.8 MB `Q4_0`, and 895 t/s implies ~80 GB/s against a 384 GB/s bus. The stock 330 MB drafter that *cannot* fit the cache beat every cache-sized variant on held-out prompts. RDNA 2 also exposes no API to pin a buffer in MALL. Details in `MEMORY/LESSONS.md` and EXP-028. The live question is which memory tier to place a drafter in — VRAM or DDR4 — not whether the cache can be used.
+
 ## Reading Order
 
 A fresh session reads these in order and stops when it has what it needs.

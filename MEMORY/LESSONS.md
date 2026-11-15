@@ -36,3 +36,18 @@
 ## Reasoning Models & Quality Verification Gates
 - **Lesson:** Modern reasoning models (e.g. Qwen 3.8) output extended chain-of-thought traces inside `<think>` or `reasoning_content` before generating the final answer. Testing with short token limits (`max_tokens <= 128`) causes the model to exhaust its budget inside the thinking phase, leaving `content` empty and causing syntax or schema checkers to fail.
 - **Rule:** Quality gates must set sufficient headroom (`max_tokens >= 512`) and parse the final emitted `content` rather than the thinking trace.
+
+## Infinity Cache Residency — Closed Negative Result (2026-11-15)
+- **Hypothesis (now closed):** a draft model small enough to fit Navi 22's 96 MB Infinity Cache (<90 MB) would generate at on-die SRAM speed (>1 TB/s), making speculative decoding nearly free.
+- **Falsified by our own measurements, not by argument:**
+  - **Smaller was slower.** 91.1 MB `Q2_0` ran at 209.0 t/s; the larger 149.8 MB `Q4_0` ran at 652.4 t/s (EXP-007). A cache-residency theory predicts the opposite ordering.
+  - **The workload never approached the memory limit.** 895 t/s at ~90 MB per pass implies ~80 GB/s of weight streaming, against a 384 GB/s GDDR6 bus. Faster memory had nothing to give because memory was not the constraint.
+  - **The winner cannot fit.** The stock 330 MB 24-layer drafter generalised at 74.4–85.6% acceptance on held-out prompts, versus 34.2% for the 96 MB-class healed 14L (EXP-015).
+- **Mechanism was never available.** RDNA 2 exposes no API to pin a buffer in MALL. NVIDIA's `cudaAccessPolicyWindow` has no AMD equivalent. Residency was neither controllable nor measured — no cache counters were profiled.
+- **Rule:** do not reopen Infinity Cache residency as an open hypothesis. It is closed. The live, controllable question is *which memory tier to place a drafter in* — VRAM or DDR4 — because both are measurable and neither requires undocumented hardware control.
+- **Provenance defect:** the 895 t/s figure in `README.md` and three docs has no `EXPERIMENT_LOG` entry and no benchmark JSON. Treat as unverified until a run is recorded.
+
+## Provenance Rule for Numbers (2026-11-15)
+- **Lesson:** a throughput figure is only a fact if a raw artifact backs it. `895`, `652.4`, and `209.0` all appear in prose but in no JSON file; a repo-wide search of `bench/reports/*.json` and `MEMORY/*.json` returns no match for any of them.
+- **Cause:** the numbers were reported into markdown and never written out by the benchmark harness.
+- **Rule:** every number in `README.md`, `docs/`, or `MEMORY/DIGEST.md` must trace to a JSON file or an `EXPERIMENT_LOG` entry with a recorded command. If it cannot, mark it `unverified` in place rather than deleting it — an honest gap beats a confident guess.

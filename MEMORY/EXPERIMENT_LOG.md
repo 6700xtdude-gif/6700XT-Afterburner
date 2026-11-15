@@ -528,3 +528,25 @@
 
 ### Status
 COMPLETE. Repo pushed at `a36892f`. Pre-reimage gate green. The 96 GB comparison has a recorded 64 GB baseline to measure against.
+
+## EXP-028: Infinity Cache Result Audit — Measured vs Inferred, and Number Provenance
+- **Date / Time:** 2026-11-15
+- **Target:** Separate what was measured from what was inferred in the Infinity Cache negative result, and verify that every headline number traces to a raw artifact.
+
+### Observed
+1. **Measured, with experiment records.** `Q2_0` 14L standalone 209.0 t/s and `Q4_0` 14L standalone 652.4 t/s (EXP-007). Unhealed 14L acceptance 0.0% (`Q2_0`, 17.0 t/s) and 21.2% (`Q4_0`, 45.8 t/s), KL 269.41 (EXP-011). Stock 0.5B held-out acceptance 74.4–85.6% versus 34.2% for Healed 14L (EXP-015).
+2. **The decisive datum was already logged and never read.** The smaller 91.1 MB `Q2_0` was **3.1x slower** than the larger 149.8 MB `Q4_0`. Cache-residency theory predicts the reverse ordering. The falsification was sitting in EXP-007 the whole time.
+3. **Unverified.** The `895 t/s` figure in `README.md`, `docs/DORY_LOOPED_96MB_SURGERY.md`, `docs/INFINITY_CACHE_HARDWARE_MATRIX.md`, and `docs/YOUTUBE_SCRIPT.md` has no `EXPERIMENT_LOG` entry and no JSON artifact. `Select-String` across `bench/reports/*.json` and `MEMORY/*.json` returns no match for `895`, `652.4`, or `209.0`.
+4. **Inferred, not measured.** "Kernel launch overhead is the bottleneck" is arithmetic — 1/895 s ≈ 1.1 ms per token, divided by roughly 200 dispatches ≈ 5 µs each — with no profiler run. Cache residency was never measured with AMD RGP or `rocprofiler`; the repo's own docs say so.
+5. **The 32k vocabulary cut destroyed a special token.** `Qwen2.5-Coder` encodes `"assistant"` in `<|im_start|>assistant\n` as ID `77091`, which is above the 32,753 cutoff. Naive 32k pruning split it into `[395, 11202]`, breaking the chat turn marker (EXP-014).
+
+### Inferred
+- The negative result stands on the size/speed inversion and the bandwidth arithmetic. It does **not** stand on a cache-residency measurement, because none was taken. The conclusion is sound; the mechanism is inferred.
+
+### Actions
+1. `MEMORY/LESSONS.md`: two new entries — the closed Infinity Cache result, and a provenance rule for numbers.
+2. `docs/PI_HARNESS_PLAN.md`: plan for the Pi harness (standing instructions, load timeout, real completion probe, one launcher, read-only smoke test). **Not executed** — pending reboot.
+3. Fix queue: mark `895` unverified in place; extend `scripts/memory_build.py`'s unsourced-number check beyond `DIGEST.md` to `README.md` and `docs/`.
+
+### Status
+AUDIT COMPLETE. Nothing executed against the model server. Plan recorded, not run.
