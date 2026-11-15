@@ -1,0 +1,25 @@
+# Normalize line endings for text sources
+* text=auto
+
+# Windows-first project: keep PowerShell scripts CRLF-safe
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Mark binary assets so git never attempts text diffs or merges
+*.mp4 binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.wav binary
+*.mp3 binary
+
+# Generated benchmark output is data, not source
+*.jsonl text eol=lf
+
+# Vendored llama.cpp tree is never tracked here (see docs/VENDORED_TREES.md)
+tools/llama.cpp/** -text

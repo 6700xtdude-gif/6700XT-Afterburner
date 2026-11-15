@@ -1,0 +1,14 @@
+﻿diff --git a/conversion/base.py b/conversion/base.py
+index 58ddb5d..a8815b0 100644
+--- a/conversion/base.py
++++ b/conversion/base.py
+@@ -2177,6 +2177,9 @@ class TextModel(ModelBase):
+         if chkhsh == "6e040dfe72e4b85855588c53acf4909ac4e98e55bc3a33cd7db499180dc42a78":
+             # ref: https://huggingface.co/Aleph-Alpha/Kolibri-1
+             res = "qwen2"
++        if chkhsh == "b4a5c43e2d3c6e443c34fc3e5ca6cb8b6179eb040cbea10d5c47316ca41a7076":
++            # ref: Project Strata Qwen 2.5 Coder 0.5B 32k Pruned
++            res = "qwen2"
+         if chkhsh == "b3d1dd861f1d4c5c0d2569ce36baf3f90fe8a102db3de50dd71ff860d91be3df":
+             # ref: https://huggingface.co/aari1995/German_Semantic_V3
+             res = "jina-v2-de"
