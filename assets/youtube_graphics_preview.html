@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6700XT-Afterburner — Kai-Style Animated YouTube Graphics Studio</title>
+  <style>
+    :root {
+      --bg: #07080c;
+      --panel: #0d1018;
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --cyan: #00f0ff;
+      --magenta: #ff2ae5;
+      --crimson: #e01e26;
+      --text: #eef3ff;
+      --muted: #8b96b0;
+      --grid: rgba(0, 240, 255, 0.045);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+        radial-gradient(circle at 22% 18%, rgba(0, 240, 255, 0.09), transparent 45%),
+        radial-gradient(circle at 78% 22%, rgba(255, 42, 229, 0.09), transparent 45%);
+      background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--panel-border);
+      background: rgba(10, 12, 18, 0.88);
+      backdrop-filter: blur(10px);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand img {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid rgba(224, 30, 38, 0.55);
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.25);
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.4px;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      border: 1px solid var(--panel-border);
+      padding: 9px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.18), rgba(255, 42, 229, 0.18));
+      border-color: var(--cyan);
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.2);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pill-btn {
+      background: rgba(224, 30, 38, 0.16);
+      color: #ff8e93;
+      border: 1px solid rgba(224, 30, 38, 0.5);
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .pill-btn.active {
+      background: rgba(0, 240, 255, 0.14);
+      color: var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* 16:9 OBS-Ready Stage */
+    .stage {
+      width: min(1240px, 100%);
+      aspect-ratio: 16 / 9;
+      background: radial-gradient(circle at 50% 85%, rgba(224, 30, 38, 0.14), rgba(7, 8, 12, 0.96) 62%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.75), inset 0 0 80px rgba(0, 240, 255, 0.04);
+      position: relative;
+      overflow: hidden;
+      padding: 28px 34px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scene {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .scene.active {
+      display: flex;
+      animation: fadeIn 0.35s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .scene-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--cyan);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .scene-title {
+      font-size: clamp(22px, 2.5vw, 32px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .scene-title span.mag { color: var(--magenta); }
+    .scene-title span.cy { color: var(--cyan); }
+
+    .badge-chip {
+      font-family: "JetBrains Mono", "Cascadia Code", monospace;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      background: rgba(0, 240, 255, 0.08);
+      color: var(--cyan);
+    }
+
+    /* Scene 1: 3-Layer OS Migration */
+    .split-grid {
+      display: grid;
+      grid-template-columns: 1fr 230px 1fr;
+      gap: 18px;
+      flex: 1;
+      align-items: stretch;
+      margin-top: 6px;
+    }
+
+    .node-card {
+      background: rgba(14, 18, 28, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 16px 18px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .node-card.cyan-glow {
+      border-color: rgba(0, 240, 255, 0.45);
+      box-shadow: 0 0 26px rgba(0, 240, 255, 0.12);
+    }
+
+    .node-card.mag-glow {
+      border-color: rgba(255, 42, 229, 0.45);
+      box-shadow: 0 0 26px rgba(255, 42, 229, 0.12);
+    }
+
+    .node-card.red-glow {
+      border-color: rgba(224, 30, 38, 0.55);
+      box-shadow: 0 0 26px rgba(224, 30, 38, 0.16);
+    }
+
+    .card-kicker {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .cyan-text { color: var(--cyan); }
+    .mag-text { color: var(--magenta); }
+    .red-text { color: #ff5b63; }
+
+    .node-card h3 {
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+
+    .code-pill {
+      font-family: "Cascadia Code", monospace;
+      font-size: 12px;
+      background: rgba(0, 0, 0, 0.48);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 8px 10px;
+      border-radius: 8px;
+      color: #cfe4ff;
+      line-height: 1.45;
+    }
+
+    .center-hub {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      position: relative;
+      padding-bottom: 4px;
+    }
+
+    .logo-anchor {
+      width: 210px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 36px rgba(0, 240, 255, 0.18), 0 0 36px rgba(255, 42, 229, 0.18);
+      z-index: 3;
+    }
+
+    .os-switch-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .os-pill {
+      flex: 1;
+      text-align: center;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .os-pill.active-win {
+      border-color: var(--cyan);
+      background: rgba(0, 240, 255, 0.16);
+      color: #fff;
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.22);
+    }
+
+    .os-pill.active-lin {
+      border-color: var(--magenta);
+      background: rgba(255, 42, 229, 0.16);
+      color: #fff;
+      box-shadow: 0 0 18px rgba(255, 42, 229, 0.22);
+    }
+
+    .flow-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .trace-cyan {
+      fill: none;
+      stroke: var(--cyan);
+      stroke-width: 2.5;
+      stroke-dasharray: 8 8;
+      opacity: 0.72;
+      animation: dashFlow 1.6s linear infinite;
+    }
+
+    .trace-mag {
+      fill: none;
+      stroke: var(--magenta);
+      stroke-width: 2.5;
+      stroke-dasharray: 8 8;
+      opacity: 0.72;
+      animation: dashFlow 1.6s linear infinite;
+    }
+
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -32; }
+    }
+
+    /* Scene 2: MoE Token Router */
+    .moe-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr 270px;
+      gap: 18px;
+      flex: 1;
+      align-items: center;
+    }
+
+    .token-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .token-box {
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(15, 20, 32, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: "Cascadia Code", monospace;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.2s ease;
+    }
+
+    .token-box.selected {
+      border-color: var(--cyan);
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.22);
+      transform: translateX(4px);
+    }
+
+    .expert-matrix-wrap {
+      background: rgba(11, 14, 22, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 16px;
+      padding: 16px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .expert-grid {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 5px;
+      margin: 10px 0;
+    }
+
+    .expert-cell {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.25s ease;
+    }
+
+    .expert-cell.active-cyan {
+      background: var(--cyan);
+      border-color: #fff;
+      box-shadow: 0 0 10px var(--cyan);
+      transform: scale(1.15);
+    }
+
+    .expert-cell.active-mag {
+      background: var(--magenta);
+      border-color: #fff;
+      box-shadow: 0 0 10px var(--magenta);
+      transform: scale(1.15);
+    }
+
+    /* Scene 3: B-Roll PIP + 2-DIMM Telemetry */
+    .broll-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 22px;
+      flex: 1;
+      align-items: stretch;
+    }
+
+    .pip-frame {
+      border-radius: 16px;
+      border: 2px dashed rgba(0, 240, 255, 0.5);
+      background: rgba(6, 8, 12, 0.85);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .pip-corner {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      font-family: "Cascadia Code", monospace;
+      font-size: 11px;
+      color: #ff5b63;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rec-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ff3b47;
+      box-shadow: 0 0 10px #ff3b47;
+      animation: blink 1.1s infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0.25; } }
+
+    .bar-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      justify-content: center;
+    }
+
+    .metric-bar-card {
+      background: rgba(14, 18, 28, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .track {
+      height: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.7s ease;
+    }
+
+    .fill-cyan { background: linear-gradient(90deg, #0099ff, var(--cyan)); box-shadow: 0 0 14px rgba(0, 240, 255, 0.5); }
+    .fill-mag { background: linear-gradient(90deg, #9d2bff, var(--magenta)); box-shadow: 0 0 14px rgba(255, 42, 229, 0.45); }
+    .fill-dim { background: linear-gradient(90deg, #4b5568, #70809c); }
+
+    .obs-clean header,
+    .obs-clean .footer-hint {
+      display: none;
+    }
+
+    .footer-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 0 20px 18px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="branding/6700XT_RDNA2_Logo.png" alt="6700 XT Logo" />
+      <div>
+        <div class="brand-title">6700XT-Afterburner Visual Studio</div>
+        <div class="brand-sub">Kai-Style Dark Diagrams • Built from Your Cyan / Magenta RDNA 2 Artwork</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showScene(0, this)">1. 45-Min OS Migration</button>
+      <button class="tab-btn" onclick="showScene(1, this)">2. MoE 8/256 Expert Router</button>
+      <button class="tab-btn" onclick="showScene(2, this)">3. Phone B-Roll + 2-DIMM Lift</button>
+    </div>
+
+    <div class="controls">
+      <button class="pill-btn" id="obsBtn" onclick="toggleObsMode()">OBS Clean Stage Mode: OFF</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="stage">
+      <!-- SCENE 1 -->
+      <section class="scene active" id="scene-0">
+        <svg class="flow-svg" viewBox="0 0 1200 620" preserveAspectRatio="none">
+          <path class="trace-cyan" d="M 555 430 L 555 340 L 360 340 L 360 220" />
+          <path class="trace-cyan" d="M 555 430 L 420 430 L 420 510 L 330 510" />
+          <path class="trace-mag" d="M 645 430 L 645 340 L 840 340 L 840 220" />
+          <path class="trace-mag" d="M 645 430 L 780 430 L 780 510 L 870 510" />
+        </svg>
+
+        <div class="scene-header">
+          <div>
+            <div class="eyebrow">Episode 6 • Portability Architecture</div>
+            <h1 class="scene-title"><span class="cy">Windows</span> Is Just the Launcher — <span class="mag">GitHub</span> Is the Brain</h1>
+          </div>
+          <div class="badge-chip" id="osStatusBadge">TARGET: WINDOWS 11 (SANDBOX)</div>
+        </div>
+
+        <div class="split-grid">
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div class="node-card cyan-glow">
+              <div>
+                <div class="card-kicker cyan-text">Layer 3 • Heavy Silicon Weights (Local NVMe)</div>
+                <h3>GGUF Models &amp; Vulkan Engine</h3>
+              </div>
+              <div class="code-pill" id="engineCode">
+                Models\Qwen3.8-27B-IQ2_M.gguf (10.2 GB)<br>
+                llama-server.exe -ngl 99 -fa on -c 65536
+              </div>
+            </div>
+
+            <div class="node-card red-glow">
+              <div>
+                <div class="card-kicker red-text">Swappable Host Shell (&lt; 45 Min)</div>
+                <h3>Click to Simulate OS Swap</h3>
+                <div class="os-switch-row">
+                  <div class="os-pill active-win" id="btnWin" onclick="setOsTarget('win')">Windows 11 (.ps1)</div>
+                  <div class="os-pill" id="btnLin" onclick="setOsTarget('lin')">Linux (bash / ROCm)</div>
+                </div>
+              </div>
+              <div class="code-pill" id="launcherNote">
+                Only start_local_server.ps1 &amp; .bat wrappers are Windows-specific.
+              </div>
+            </div>
+          </div>
+
+          <div class="center-hub">
+            <img class="logo-anchor" src="branding/6700XT_RDNA2_Logo.png" alt="6700XT RDNA 2 Anchor" />
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div class="node-card mag-glow">
+              <div>
+                <div class="card-kicker mag-text">Layer 2 • Portable Brain (GitHub Repo — MBs)</div>
+                <h3>One Clone Restores Everything</h3>
+              </div>
+              <div class="code-pill">
+                git clone 6700XT-Afterburner<br>
+                ├─ AGENTS.md ("Aye aye, captain.")<br>
+                ├─ NOTEBOOK/SYSTEM_BASELINE.md<br>
+                └─ dashboard/ + bench/ + scripts/
+              </div>
+            </div>
+
+            <div class="node-card cyan-glow">
+              <div>
+                <div class="card-kicker cyan-text">Layer 1 • Cloud Profile (Account Login)</div>
+                <h3>Antigravity + 6700xtdude@gmail.com</h3>
+              </div>
+              <div class="code-pill">
+                Sign into Antigravity on fresh OS →<br>
+                Voice control &amp; IDE session re-attached.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCENE 2 -->
+      <section class="scene" id="scene-1">
+        <div class="scene-header">
+          <div>
+            <div class="eyebrow">Explainer • How Qwen 3.6 35B-A3B Picks Circuits</div>
+            <h1 class="scene-title">MoE Experts Route <span class="cy">Per Token</span>, Not <span class="mag">Per Topic</span></h1>
+          </div>
+          <div class="badge-chip" id="routerBadge">ACTIVE: 8 / 256 EXPERTS (~3.5 GB)</div>
+        </div>
+
+        <div class="moe-layout">
+          <div class="token-stream">
+            <div style="font-size:12px; color:var(--muted); margin-bottom:2px;">Click a token (auto-cycles every 1.8s):</div>
+            <div class="token-box selected" onclick="selectToken(0)"><span>"Get-WinEvent"</span><span class="cyan-text">ID 18442</span></div>
+            <div class="token-box" onclick="selectToken(1)"><span>"Scottish"</span><span class="mag-text">ID 39104</span></div>
+            <div class="token-box" onclick="selectToken(2)"><span>"0x803F7001"</span><span class="cyan-text">ID 9012</span></div>
+            <div class="token-box" onclick="selectToken(3)"><span>"{"count": 64}"</span><span class="mag-text">ID 4481</span></div>
+          </div>
+
+          <div class="expert-matrix-wrap">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:13px; font-weight:700;">256 Feedforward Experts (Layer k)</span>
+              <span id="tokenDetail" style="font-family:monospace; font-size:12px; color:var(--cyan);">Routing: PowerShell / Windows CLI pattern</span>
+            </div>
+            <div class="expert-grid" id="expertGrid"></div>
+            <div style="font-size:12px; color:var(--muted);">
+              248 experts stay idle in DDR4 per token → RX 6700 XT + Ryzen 5600 hits <strong style="color:#fff;">16.78 t/s</strong> vs. <strong style="color:#fff;">7.54 t/s</strong> on dense 27B offload.
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:14px; align-items:center;">
+            <img src="branding/6700XT_01.png" alt="Neural Branch 6700XT" style="width:220px; border-radius:14px; border:1px solid rgba(255,42,229,0.4);" />
+            <div class="code-pill" style="width:100%; font-size:11.5px;">
+              Attention reads full English/Windows pretext first → steers router away from Chinese or poetry circuits.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCENE 3 -->
+      <section class="scene" id="scene-2">
+        <div class="scene-header">
+          <div>
+            <div class="eyebrow">Original Hardware Proof • Project 9696XT</div>
+            <h1 class="scene-title">Human <span class="cy">B-Roll</span> + Measured <span class="mag">2-DIMM</span> Bandwidth</h1>
+          </div>
+          <div class="badge-chip">RYZEN 5 5600 + RX 6700 XT 12GB</div>
+        </div>
+
+        <div class="broll-grid">
+          <div class="pip-frame">
+            <div class="pip-corner"><span class="rec-dot"></span> CELL PHONE B-ROLL DROP ZONE (16:9 / 9:16 PIP)</div>
+            <img src="branding/6700XT_RDNA2_Logo.png" alt="B-Roll Placeholder" style="width:150px; border-radius:12px; opacity:0.85; margin-bottom:14px;" />
+            <div style="font-size:16px; font-weight:700; margin-bottom:6px;">Swapping Physical DDR4 Sticks on SANDBOX</div>
+            <div style="font-size:13px; color:var(--muted); max-width:390px;">
+              Drop your original cell phone clip of pulling 4×16 GB vs. 2×16 GB (1 DPC / 1T) or 2×32 GB straight over this frame in DaVinci Resolve or OBS.
+            </div>
+          </div>
+
+          <div class="bar-stack">
+            <div class="metric-bar-card">
+              <div class="metric-row"><span>Qwen 3.8 27B IQ2_M (100% 12GB VRAM)</span><span class="cyan-text">22.61 t/s</span></div>
+              <div class="track"><div class="fill fill-cyan" style="width:94%;"></div></div>
+            </div>
+            <div class="metric-bar-card">
+              <div class="metric-row"><span>Qwen 3.6 35B MoE (2-DIMM 32GB / 64GB)</span><span class="mag-text">16.78 / 16.26 t/s</span></div>
+              <div class="track"><div class="fill fill-mag" style="width:70%;"></div></div>
+            </div>
+            <div class="metric-bar-card">
+              <div class="metric-row"><span>Qwen 3.8 27B Hybrid (2-DIMM 1R — +23%)</span><span class="cyan-text">7.54 t/s</span></div>
+              <div class="track"><div class="fill fill-cyan" style="width:34%;"></div></div>
+            </div>
+            <div class="metric-bar-card">
+              <div class="metric-row"><span>Qwen 3.8 27B Hybrid (4-DIMM 2 DPC Baseline)</span><span style="color:#9aa7c0;">6.13 t/s</span></div>
+              <div class="track"><div class="fill fill-dim" style="width:27%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="footer-hint">
+    Tip: Press <strong>F11</strong> for fullscreen and click <strong>OBS Clean Stage Mode: ON</strong> to record crisp 16:9 dark-mode animations directly into your videos. Press <strong>Esc</strong> or refresh to exit OBS mode.
+  </div>
+
+  <script>
+    const scenes = document.querySelectorAll('.scene');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+
+    function showScene(idx, btn) {
+      scenes.forEach((s, i) => s.classList.toggle('active', i === idx));
+      tabBtns.forEach((b, i) => b.classList.toggle('active', i === idx));
+    }
+
+    function setOsTarget(mode) {
+      const badge = document.getElementById('osStatusBadge');
+      const engine = document.getElementById('engineCode');
+      const note = document.getElementById('launcherNote');
+      const winBtn = document.getElementById('btnWin');
+      const linBtn = document.getElementById('btnLin');
+
+      if (mode === 'lin') {
+        badge.textContent = 'TARGET: LINUX WORKSTATION (< 45 MIN)';
+        badge.style.borderColor = 'rgba(255, 42, 229, 0.55)';
+        badge.style.color = '#ff7cf0';
+        engine.innerHTML = '/mnt/models/Qwen3.8-27B-IQ2_M.gguf (10.2 GB)<br>./llama-server -ngl 99 -fa on -c 65536';
+        note.textContent = 'Same GGUF weights, same dashboard/server.py, same AGENTS.md rules!';
+        winBtn.className = 'os-pill';
+        linBtn.className = 'os-pill active-lin';
+      } else {
+        badge.textContent = 'TARGET: WINDOWS 11 (SANDBOX)';
+        badge.style.borderColor = 'rgba(0, 240, 255, 0.35)';
+        badge.style.color = '#00f0ff';
+        engine.innerHTML = 'Models\\Qwen3.8-27B-IQ2_M.gguf (10.2 GB)<br>llama-server.exe -ngl 99 -fa on -c 65536';
+        note.textContent = 'Only start_local_server.ps1 & .bat wrappers are Windows-specific.';
+        winBtn.className = 'os-pill active-win';
+        linBtn.className = 'os-pill';
+      }
+    }
+
+    // Build 256 MoE grid
+    const grid = document.getElementById('expertGrid');
+    const cells = [];
+    for (let i = 0; i < 256; i++) {
+      const d = document.createElement('div');
+      d.className = 'expert-cell';
+      grid.appendChild(d);
+      cells.push(d);
+    }
+
+    const tokenPatterns = [
+      { label: 'Routing: PowerShell / Windows Admin syntax', picks: [12, 19, 44, 71, 108, 133, 198, 241], cls: 'active-cyan' },
+      { label: 'Routing: Cultural noun + English modifier pattern', picks: [5, 31, 67, 89, 142, 176, 205, 229], cls: 'active-mag' },
+      { label: 'Routing: 32-bit Hex Error Code / HRESULT', picks: [8, 22, 51, 95, 114, 160, 211, 249], cls: 'active-cyan' },
+      { label: 'Routing: Structured JSON key-value syntax', picks: [3, 28, 64, 101, 129, 155, 187, 236], cls: 'active-mag' }
+    ];
+
+    let currentToken = 0;
+    const tokenBoxes = document.querySelectorAll('.token-box');
+
+    function selectToken(idx) {
+      currentToken = idx;
+      tokenBoxes.forEach((b, i) => b.classList.toggle('selected', i === idx));
+      cells.forEach(c => c.className = 'expert-cell');
+      const pat = tokenPatterns[idx];
+      document.getElementById('tokenDetail').textContent = pat.label;
+      pat.picks.forEach(p => cells[p].classList.add(pat.cls));
+    }
+
+    selectToken(0);
+    setInterval(() => {
+      selectToken((currentToken + 1) % tokenPatterns.length);
+    }, 1800);
+
+    function toggleObsMode() {
+      document.body.classList.toggle('obs-clean');
+      const btn = document.getElementById('obsBtn');
+      const on = document.body.classList.contains('obs-clean');
+      btn.textContent = on ? 'OBS Clean Stage Mode: ON' : 'OBS Clean Stage Mode: OFF';
+      btn.classList.toggle('active', on);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.body.classList.contains('obs-clean')) {
+        toggleObsMode();
+      }
+    });
+  </script>
+</body>
+</html>
