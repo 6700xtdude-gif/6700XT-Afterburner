@@ -57,7 +57,9 @@ $trees = @(
     @{ Name = "opencode-config";           Path = (Join-Path $profileDir ".config\opencode") },
     @{ Name = "gemini-config";             Path = (Join-Path $profileDir ".gemini\config") },
     @{ Name = "pi-agent-config";           Path = (Join-Path $profileDir ".pi\agent\models.json"); File = $true },
-    @{ Name = "pi-agent-settings";         Path = (Join-Path $profileDir ".pi\agent\settings.json"); File = $true }
+    @{ Name = "pi-agent-settings";         Path = (Join-Path $profileDir ".pi\agent\settings.json"); File = $true },
+    @{ Name = "agents-md-machine";         Path = (Join-Path $profileDir "AGENTS.md"); File = $true },
+    @{ Name = "agents-md-documents";       Path = (Join-Path $profileDir "Documents\AGENTS.md"); File = $true }
 )
 
 New-Item -ItemType Directory -Force -Path $root | Out-Null

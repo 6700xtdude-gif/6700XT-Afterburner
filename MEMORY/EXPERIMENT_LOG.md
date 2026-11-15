@@ -499,3 +499,32 @@
 - **Status:** COMPLETE and operational. Qwen 3.8 27B IQ2_M left active on port 8080 with 64k context.
 
 
+
+## EXP-027: Memory-System Recovery Audit & Reimage Readiness
+- **Date / Time:** 2026-11-15T00:45:00-06:00
+- **Target:** Determine whether the repo, harness memory, and credentials were actually damaged after the Google Antigravity install, and establish a memory contract that survives a reimage plus a 96 GB RAM change.
+
+### Observed
+1. Repo was **not** corrupted. `git fsck` clean, `main` == `origin/main`, 152 tracked files, 13.8 MB `.git`, no stashes. The 139 GB working tree is `Models/` (135.4 GB) plus the vendored llama.cpp build, both correctly gitignored.
+2. Docs were **not** corrupted. All checked files are valid UTF-8 with zero replacement characters; the garbled console output is PowerShell CP437 rendering.
+3. One real loss risk: `tools/llama.cpp/conversion/base.py` held a +3 line `chkhsh` entry for the pruned Qwen 2.5 Coder 0.5B 32k model. The parent `.gitignore` excludes `tools/llama.cpp/`, so `git status` never showed it. Exported to `patches/0001-qwen25-coder-0.5b-pruned-hash.patch`.
+4. Memory was fragmented across four stores with no shared truth: `opencode.db` (27.7 MB + 15.4 MB WAL), Pi `sessions/`, Antigravity `brain/` + 24 `conversations/*.db`, and git. Three project artifacts existed only inside Antigravity brain folders: `strata_execution_plan.md`, `qwen38_27b_bottleneck_report.md`, `youtube_series_storyboard.html`. Harvested into `docs/` and `assets/`.
+5. Two live credentials sat in plaintext. A classic GitHub PAT in `Not_A_Token.txt` was live with `delete_repo`, `repo`, `workflow`, `audit_log` scopes and was **not** the token git or gh used. The OpenRouter key `AntiGravity (997)` sat in `~/.gemini/config/mcp_config.json`.
+6. Both credentials were revoked at the provider. Verified 401 on both. No copy of either remains under `Documents`.
+7. Google deprecated consumer Gemini Code Assist access on 2026-06-18. A Google AI Pro subscription cannot authenticate OpenCode; the Gemini CLI OAuth flow no longer serves consumer tiers, and third-party use of it is a policy violation.
+
+### Inferred
+- The damage was not data loss. It was **state fragmentation**: four harnesses each holding a private memory store, plus a permission preset (`TURBO` / `EAGER` / non-workspace `ALLOW`) that let one agent write outside its workspace.
+- Chat history is not memory. Only git-backed ledgers survived scrutiny, and only because they were committed.
+
+### Actions
+1. `scripts/backup_memory.ps1`: verified git bundle, WAL-safe SQLite snapshot, Antigravity brain and conversations, Pi sessions, harness configs, and the out-of-repo AGENTS.md files. 10 artifacts, 324.7 MB, bundle verified.
+2. `scripts/verify_memory_system.ps1`: 12-check conformance gate. Result 10 pass / 2 warn / 0 fail.
+3. `tests/test_memory_contract.py`: 14 hermetic tests asserting the three AGENTS.md scopes, the memory ledger, the exported patch, the absence of committed secrets, and the tooling. Full suite now 35/35.
+4. Instruction hierarchy created: machine scope `C:\Users\6700XT\AGENTS.md`, documents scope `C:\Users\6700XT\Documents\AGENTS.md`, project scope unchanged.
+5. `MEMORY/PROTOCOL.md`: the durable-memory contract, session ritual, and self-improvement loop.
+6. `bench/ram_topology.py`: captures DIMM topology and pairs it with throughput. Baseline `MEMORY/RAM_64gb-2dimm.json` recorded: 64 GB, 2 DIMMs, 3200 MHz rated **and** actual.
+7. `docs/REIMAGE_RUNBOOK.md` and `docs/VENDORED_TREES.md` written.
+
+### Status
+COMPLETE. Repo pushed at `a36892f`. Pre-reimage gate green. The 96 GB comparison has a recorded 64 GB baseline to measure against.

@@ -1,0 +1,61 @@
+{
+  "collectedAt": "2026-11-15T00:35:21.5673312-06:00",
+  "host": {
+    "cpu": {
+      "name": "AMD Ryzen 5 5600 6-Core Processor",
+      "cores": 6,
+      "threads": 12,
+      "maxMHz": 3501
+    },
+    "board": {
+      "manufacturer": "Gigabyte Technology Co., Ltd.",
+      "model": "B550 AORUS PRO AC"
+    },
+    "bios": {
+      "version": "F19a",
+      "date": "04/13/2026 19:00:00"
+    },
+    "os": {
+      "caption": "Microsoft Windows 11 Pro",
+      "version": "10.0.26300",
+      "build": "26300",
+      "totalGB": 63.9
+    }
+  },
+  "memory": {
+    "dimmCount": 2,
+    "totalGB": 64,
+    "speedRatedMHz": 3200,
+    "speedActualMHz": 3200,
+    "ranBelowRating": false,
+    "channels": "dual (Ryzen 5000, 2 memory channels; DIMM count does not add channels)",
+    "dimms": [
+      {
+        "slot": "DIMM 1",
+        "bank": "P0 CHANNEL A",
+        "capacityGB": 32,
+        "speedRatedMHz": 3200,
+        "speedActualMHz": 3200,
+        "manufacturer": "Unknown",
+        "partNumber": "3200 C16 Series",
+        "memoryType": 26,
+        "dataWidth": 64,
+        "totalWidth": 64
+      },
+      {
+        "slot": "DIMM 1",
+        "bank": "P0 CHANNEL B",
+        "capacityGB": 32,
+        "speedRatedMHz": 3200,
+        "speedActualMHz": 3200,
+        "manufacturer": "Unknown",
+        "partNumber": "3200 C16 Series",
+        "memoryType": 26,
+        "dataWidth": 64,
+        "totalWidth": 64
+      }
+    ]
+  },
+  "label": "64gb-2dimm",
+  "capturedAtLocal": "2026-11-15T00:35:23"
+}

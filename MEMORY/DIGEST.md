@@ -2,9 +2,21 @@
 
 ## Active Context & State
 - **GitHub Repository:** https://github.com/6700xtdude-gif/6700XT-Afterburner (`main` branch synced, working tree clean).
-- **Host:** Windows 11 Pro, Ryzen 5 5600 (6C/12T), 32 GB DDR4-3200 (2x16 GB DIMMs), AMD Radeon RX 6700 XT 12 GB (`Navi 22` / `gfx1031` Vulkan).
+- **Host:** Windows 11 Pro, Ryzen 5 5600 (6C/12T), 64 GB DDR4-3200 (2x32 GB DIMMs; 96 GB 4-DIMM upgrade pending, see `MEMORY/RAM_64gb-2dimm.json`), AMD Radeon RX 6700 XT 12 GB (`Navi 22` / `gfx1031` Vulkan).
 - **Active Phase:** Production Ready & Verified — 100% VRAM Resident 27B Speculative Decoding (`Qwen3.8-27B-IQ2_M` verified at **22.61 t/s median**), 35B MoE Hybrid (**16.78 t/s**), 27B Dense Hybrid (**7.54 t/s**), standardized spec-driven benchmarking (`bench/`), and hermetic testing (`tests/`).
 - **Server Status:** Active at `http://127.0.0.1:8080/v1` running `Qwen3.8-27B-IQ2_M.gguf` (64k context, MTP speculation enabled, 100% VRAM resident).
+
+## Memory System (added 2026-11-15)
+
+Durable state lives in git, not in any harness's chat database.
+
+- **Protocol:** `MEMORY/PROTOCOL.md` — the one rule, scope hierarchy, what goes where, session ritual, self-improvement loop.
+- **Instruction scopes:** `C:\Users\6700XT\AGENTS.md` (machine) → `C:\Users\6700XT\Documents\AGENTS.md` (documents) → `AGENTS.md` here (project). Vendored `tools/llama.cpp/AGENTS.md` is upstream policy, not project policy.
+- **Conformance gate:** `scripts/verify_memory_system.ps1` and `python -m unittest tests.test_memory_contract` (14 tests). Must report `0 fail` before any reimage or hardware change.
+- **Backup:** `scripts/backup_memory.ps1` — verified git bundle, WAL-safe `opencode.db` snapshot, Antigravity brain and Pi sessions, plus the out-of-repo AGENTS.md files. 324.7 MB, 10 artifacts.
+- **Hardware change record:** `bench/ram_topology.py` writes `MEMORY/RAM_<label>.json` and compares configs.
+- **Reimage runbook:** `docs/REIMAGE_RUNBOOK.md`.
+- **Vendored-tree rule:** `docs/VENDORED_TREES.md` and `patches/` — local llama.cpp edits are exported, never left dirty.
 
 ## Current Production Stack
 - **Governance Anchor ([`AGENTS.md`](file:///c:/Users/6700XT/Documents/Strata/AGENTS.md)):**
