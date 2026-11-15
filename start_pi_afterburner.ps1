@@ -42,7 +42,7 @@ if (-not $serverUp) {
 
 Write-Host "Launching Pi Coding Agent connected to AfterBurner (64k context)..." -ForegroundColor Green
 Write-Host "Model ID: $Model (Provider: afterburner)" -ForegroundColor Cyan
-Write-Host "Unsandboxed host tools: powershell, bash, read, write, edit, web_search, web_read" -ForegroundColor Cyan
+Write-Host "Unsandboxed host tools: powershell, read, write, edit, web_search, web_read" -ForegroundColor Cyan
 Write-Host ""
 
 if ($Unattended) {

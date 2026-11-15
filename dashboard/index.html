@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AfterBurner Control Center — RX 6700 XT</title>
+  <style>
+    :root {
+      --bg: #080b11;
+      --surface: #101521;
+      --surface-2: #0b0f18;
+      --surface-hover: #161d2d;
+      --border: #1e2738;
+      --border-strong: #2d3a52;
+      --text: #e6edf7;
+      --text-muted: #8b98b1;
+      --text-dim: #5d6a82;
+      --crimson: #ef233c;
+      --crimson-glow: rgba(239, 35, 60, 0.25);
+      --amber: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.22);
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.22);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.22);
+      --mono: ui-monospace, "Cascadia Code", "Consolas", monospace;
+      --sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(900px 420px at 12% -8%, rgba(239, 35, 60, 0.10), transparent 60%),
+        radial-gradient(760px 380px at 92% 0%, rgba(6, 182, 212, 0.08), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.45;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, rgba(16, 21, 33, 0.96), rgba(11, 15, 24, 0.96));
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--crimson);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--crimson);
+      box-shadow: 0 0 12px var(--crimson);
+    }
+
+    .brand-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+
+    .status-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: var(--mono);
+      border: 1px solid var(--border-strong);
+      background: var(--surface-2);
+      color: var(--text-muted);
+    }
+
+    .pill .led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-dim);
+    }
+
+    .pill.online { border-color: rgba(16, 185, 129, 0.45); color: #6ee7b7; background: rgba(16, 185, 129, 0.1); }
+    .pill.online .led { background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
+
+    .pill.generating { border-color: rgba(245, 158, 11, 0.55); color: #fcd34d; background: rgba(245, 158, 11, 0.12); }
+    .pill.generating .led { background: var(--amber); box-shadow: 0 0 10px var(--amber); animation: pulse 1s infinite; }
+
+    .pill.loading { border-color: rgba(6, 182, 212, 0.5); color: #67e8f9; background: rgba(6, 182, 212, 0.1); }
+    .pill.loading .led { background: var(--cyan); animation: pulse 1s infinite; }
+
+    .pill.offline { border-color: rgba(239, 35, 60, 0.4); color: #fda4af; background: rgba(239, 35, 60, 0.08); }
+    .pill.offline .led { background: var(--crimson); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+
+    /* Telemetry Grid */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    @media (max-width: 1080px) {
+      .telemetry-grid { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+    }
+    @media (max-width: 600px) {
+      .telemetry-grid { grid-template-columns: 1fr; }
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      height: 166px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .metric-card:hover {
+      border-color: var(--cyan);
+      background: var(--surface-hover);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.10);
+    }
+
+    .metric-head {
+      height: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      font-weight: 600;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .metric-head > span:first-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .metric-head-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .metric-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    .mode-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 20px;
+      flex-shrink: 0;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      border-radius: 5px;
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      color: #67e8f9;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-val {
+      height: 28px;
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .metric-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .metric-card > .metric-sub {
+      height: 18px;
+      line-height: 18px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .viz-stage {
+      height: 60px;
+      min-height: 60px;
+      max-height: 60px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .viz-view {
+      height: 56px;
+      max-height: 56px;
+    }
+
+    /* Mode 1: Bar Slider */
+    .slider-wrap {
+      position: relative;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0;
+    }
+
+    .bar-track {
+      position: relative;
+      width: 100%;
+      height: 11px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      overflow: visible;
+    }
+
+    .bar-ticks {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(
+        to right,
+        transparent 24.5%, rgba(255, 255, 255, 0.14) 25%, transparent 25.5%,
+        transparent 49.5%, rgba(255, 255, 255, 0.18) 50%, transparent 50.5%,
+        transparent 74.5%, rgba(255, 255, 255, 0.14) 75%, transparent 75.5%
+      );
+      border-radius: 999px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.35s ease, background 0.35s ease;
+    }
+
+    .slider-thumb {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.65);
+      transform: translate(-50%, -50%);
+      transition: left 0.35s ease;
+      pointer-events: none;
+    }
+
+    .fill-vram { background: linear-gradient(90deg, #06b6d4, #ef233c); }
+    .fill-shared { background: linear-gradient(90deg, #f59e0b, #ef233c); }
+    .fill-compute { background: linear-gradient(90deg, #ef233c, #f59e0b); }
+    .fill-cpu { background: linear-gradient(90deg, #06b6d4, #10b981); }
+    .fill-ram { background: linear-gradient(90deg, #10b981, #06b6d4); }
+
+    /* Mode 2: Radial Gauge */
+    .gauge-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 56px;
+      max-height: 56px;
+    }
+
+    .gauge-svg {
+      width: 118px;
+      height: 56px;
+      overflow: visible;
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: var(--surface-2);
+      stroke-width: 10;
+      stroke-linecap: round;
+    }
+
+    .gauge-arc {
+      fill: none;
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 163.36;
+      stroke-dashoffset: 163.36;
+      transition: stroke-dashoffset 0.35s ease;
+    }
+
+    .gauge-text {
+      fill: var(--text);
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 700;
+      text-anchor: middle;
+    }
+
+    .gauge-subtext {
+      fill: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 9px;
+      text-anchor: middle;
+    }
+
+    /* Mode 3: Line Graph */
+    .graph-svg {
+      width: 100%;
+      height: 56px;
+      max-height: 56px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: block;
+    }
+
+    .graph-grid {
+      stroke: rgba(255, 255, 255, 0.06);
+      stroke-width: 1;
+    }
+
+    .graph-line {
+      fill: none;
+      stroke-width: 2;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+
+    /* Mode 4: Histogram */
+    .hist-bars {
+      height: 56px;
+      max-height: 56px;
+      padding: 4px 5px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    .hist-bar {
+      flex: 1;
+      min-height: 2px;
+      border-radius: 2px 2px 0 0;
+      transition: height 0.25s ease, opacity 0.25s ease;
+    }
+
+    .dual-mini {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Main Workspace Cards */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 1020px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title h2 {
+      margin: 0;
+      font-size: 0.98rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .card-badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    select, input[type="text"], input[type="password"], textarea {
+      width: 100%;
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 9px 11px;
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px var(--cyan-glow);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-family: var(--sans);
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: transform 0.08s ease, filter 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    button:active:not(:disabled) { transform: translateY(1px); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .btn-crimson {
+      background: linear-gradient(135deg, #ef233c, #c8142b);
+      color: #fff;
+      box-shadow: 0 4px 14px var(--crimson-glow);
+    }
+    .btn-crimson:hover:not(:disabled) { filter: brightness(1.08); }
+
+    .btn-amber {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: rgba(245, 158, 11, 0.55);
+      color: #fcd34d;
+    }
+    .btn-amber:hover:not(:disabled) { background: rgba(245, 158, 11, 0.25); }
+
+    .btn-cyan {
+      background: linear-gradient(135deg, #06b6d4, #0891b2);
+      color: #061218;
+      font-weight: 700;
+      box-shadow: 0 4px 14px var(--cyan-glow);
+    }
+    .btn-cyan:hover:not(:disabled) { filter: brightness(1.08); }
+
+    .btn-ghost {
+      background: var(--surface-2);
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+    .btn-ghost:hover:not(:disabled) { background: var(--surface-hover); border-color: var(--text-dim); }
+
+    .btn-danger-outline {
+      background: rgba(239, 35, 60, 0.08);
+      border-color: rgba(239, 35, 60, 0.45);
+      color: #fda4af;
+    }
+    .btn-danger-outline:hover:not(:disabled) { background: rgba(239, 35, 60, 0.18); }
+
+    .btn-voice-active {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.65);
+      color: #6ee7b7;
+    }
+
+    .inline-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    .status-banner {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      padding: 8px 11px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      word-break: break-word;
+    }
+
+    .status-banner.ok { border-color: rgba(16, 185, 129, 0.45); color: #6ee7b7; background: rgba(16, 185, 129, 0.08); }
+    .status-banner.err { border-color: rgba(239, 35, 60, 0.5); color: #fda4af; background: rgba(239, 35, 60, 0.09); }
+    .status-banner.busy { border-color: rgba(245, 158, 11, 0.5); color: #fde68a; background: rgba(245, 158, 11, 0.09); }
+
+    .info-kv {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 6px 10px;
+      font-size: 0.8rem;
+      font-family: var(--mono);
+      padding: 10px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .info-kv .k { color: var(--text-dim); }
+    .info-kv .v { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .output-box {
+      background: #06080d;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: #dbeafe;
+      min-height: 170px;
+      max-height: 380px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0;
+    }
+
+    .timer-badge {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--cyan);
+      padding: 4px 9px;
+      border-radius: 6px;
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      background: rgba(6, 182, 212, 0.08);
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Top Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-title">
+          <span class="brand-dot"></span>
+          <span>AfterBurner Control Center</span>
+        </div>
+        <div class="brand-sub">AMD Radeon RX 6700 XT (12 GB GDDR6 · Navi 22 Vulkan) · 127.0.0.1:8090</div>
+      </div>
+
+      <div class="status-strip">
+        <span id="serverPill" class="pill offline">
+          <span class="led"></span>
+          <span id="serverPillText">SERVER: CHECKING</span>
+        </span>
+        <span id="slotPill" class="pill">
+          <span class="led"></span>
+          <span id="slotPillText">SLOT 0: --</span>
+        </span>
+        <span id="ctxPill" class="pill">CTX: --</span>
+        <span id="pollPill" class="pill">POLL: --</span>
+        <span id="lanPill" class="pill" title="Open this URL on your phone over home Wi-Fi">Phone LAN: --</span>
+      </div>
+    </header>
+
+    <!-- Live Hardware Telemetry -->
+    <section class="telemetry-grid">
+      <div class="metric-card" data-tile="vram" title="Click tile to cycle: Bar Slider → Gauge → Graph → Histogram">
+        <div class="metric-head">
+          <span>Dedicated VRAM</span>
+          <div class="metric-head-right">
+            <span class="metric-tag">GDDR6 · 384 GB/s</span>
+            <span class="mode-badge" id="modeBadge-vram">BAR</span>
+          </div>
+        </div>
+        <div class="metric-val">
+          <span id="vramVal">-- MB</span>
+          <span id="vramPct" class="metric-sub">--%</span>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-view" data-view="bar">
+            <div class="slider-wrap">
+              <div class="bar-track">
+                <div class="bar-ticks"></div>
+                <div id="vramBar" class="bar-fill fill-vram"></div>
+                <div id="vramThumb" class="slider-thumb"></div>
+              </div>
+            </div>
+          </div>
+          <div class="viz-view gauge-box hidden" data-view="gauge">
+            <svg class="gauge-svg" viewBox="0 0 140 76">
+              <path class="gauge-bg" d="M 18 66 A 52 52 0 0 1 122 66" />
+              <path id="vramGaugeArc" class="gauge-arc" stroke="#06b6d4" d="M 18 66 A 52 52 0 0 1 122 66" />
+              <text id="vramGaugeTxt" class="gauge-text" x="70" y="54">--%</text>
+              <text class="gauge-subtext" x="70" y="68">12.0 GB MAX</text>
+            </svg>
+          </div>
+          <div class="viz-view hidden" data-view="graph">
+            <svg class="graph-svg" viewBox="0 0 220 58" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="gradVram" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.38" />
+                  <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.02" />
+                </linearGradient>
+              </defs>
+              <line class="graph-grid" x1="0" y1="15" x2="220" y2="15" />
+              <line class="graph-grid" x1="0" y1="30" x2="220" y2="30" />
+              <line class="graph-grid" x1="0" y1="45" x2="220" y2="45" />
+              <polygon id="vramGraphArea" fill="url(#gradVram)" points="" />
+              <polyline id="vramGraphLine" class="graph-line" stroke="#06b6d4" points="" />
+            </svg>
+          </div>
+          <div class="viz-view hidden" data-view="histogram">
+            <div id="vramHist" class="hist-bars"></div>
+          </div>
+        </div>
+        <div class="metric-sub" id="vramCap">Target: ≤ 12,288 MB (Zero-Spill)</div>
+      </div>
+
+      <div class="metric-card" data-tile="shared" title="Click tile to cycle: Bar Slider → Gauge → Graph → Histogram">
+        <div class="metric-head">
+          <span>Shared GPU Memory</span>
+          <div class="metric-head-right">
+            <span class="metric-tag">DDR4 Spill</span>
+            <span class="mode-badge" id="modeBadge-shared">BAR</span>
+          </div>
+        </div>
+        <div class="metric-val">
+          <span id="sharedVal">-- MB</span>
+          <span id="sharedStatus" class="metric-sub">System RAM</span>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-view" data-view="bar">
+            <div class="slider-wrap">
+              <div class="bar-track">
+                <div class="bar-ticks"></div>
+                <div id="sharedBar" class="bar-fill fill-shared"></div>
+                <div id="sharedThumb" class="slider-thumb" style="border-color:var(--amber);"></div>
+              </div>
+            </div>
+          </div>
+          <div class="viz-view gauge-box hidden" data-view="gauge">
+            <svg class="gauge-svg" viewBox="0 0 140 76">
+              <path class="gauge-bg" d="M 18 66 A 52 52 0 0 1 122 66" />
+              <path id="sharedGaugeArc" class="gauge-arc" stroke="#f59e0b" d="M 18 66 A 52 52 0 0 1 122 66" />
+              <text id="sharedGaugeTxt" class="gauge-text" x="70" y="54">--%</text>
+              <text class="gauge-subtext" x="70" y="68">4 GB SCALE</text>
+            </svg>
+          </div>
+          <div class="viz-view hidden" data-view="graph">
+            <svg class="graph-svg" viewBox="0 0 220 58" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="gradShared" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.38" />
+                  <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.02" />
+                </linearGradient>
+              </defs>
+              <line class="graph-grid" x1="0" y1="15" x2="220" y2="15" />
+              <line class="graph-grid" x1="0" y1="30" x2="220" y2="30" />
+              <line class="graph-grid" x1="0" y1="45" x2="220" y2="45" />
+              <polygon id="sharedGraphArea" fill="url(#gradShared)" points="" />
+              <polyline id="sharedGraphLine" class="graph-line" stroke="#f59e0b" points="" />
+            </svg>
+          </div>
+          <div class="viz-view hidden" data-view="histogram">
+            <div id="sharedHist" class="hist-bars"></div>
+          </div>
+        </div>
+        <div class="metric-sub">Keep minimal for max Vulkan speed</div>
+      </div>
+
+      <div class="metric-card" data-tile="compute" title="Click tile to cycle: Bar Slider → Gauge → Graph → Histogram">
+        <div class="metric-head">
+          <span>GPU Compute Engine</span>
+          <div class="metric-head-right">
+            <span class="metric-tag">engtype_Compute</span>
+            <span class="mode-badge" id="modeBadge-compute">BAR</span>
+          </div>
+        </div>
+        <div class="metric-val">
+          <span id="gpuCompVal">--%</span>
+          <span id="gpuCompHint" class="metric-sub">Navi 22</span>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-view" data-view="bar">
+            <div class="slider-wrap">
+              <div class="bar-track">
+                <div class="bar-ticks"></div>
+                <div id="gpuCompBar" class="bar-fill fill-compute"></div>
+                <div id="gpuCompThumb" class="slider-thumb" style="border-color:var(--crimson);"></div>
+              </div>
+            </div>
+          </div>
+          <div class="viz-view gauge-box hidden" data-view="gauge">
+            <svg class="gauge-svg" viewBox="0 0 140 76">
+              <path class="gauge-bg" d="M 18 66 A 52 52 0 0 1 122 66" />
+              <path id="compGaugeArc" class="gauge-arc" stroke="#ef233c" d="M 18 66 A 52 52 0 0 1 122 66" />
+              <text id="compGaugeTxt" class="gauge-text" x="70" y="54">--%</text>
+              <text class="gauge-subtext" x="70" y="68">COMPUTE 0</text>
+            </svg>
+          </div>
+          <div class="viz-view hidden" data-view="graph">
+            <svg class="graph-svg" viewBox="0 0 220 58" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="gradComp" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ef233c" stop-opacity="0.40" />
+                  <stop offset="100%" stop-color="#ef233c" stop-opacity="0.02" />
+                </linearGradient>
+              </defs>
+              <line class="graph-grid" x1="0" y1="15" x2="220" y2="15" />
+              <line class="graph-grid" x1="0" y1="30" x2="220" y2="30" />
+              <line class="graph-grid" x1="0" y1="45" x2="220" y2="45" />
+              <polygon id="compGraphArea" fill="url(#gradComp)" points="" />
+              <polyline id="compGraphLine" class="graph-line" stroke="#ef233c" points="" />
+            </svg>
+          </div>
+          <div class="viz-view hidden" data-view="histogram">
+            <div id="compHist" class="hist-bars"></div>
+          </div>
+        </div>
+        <div class="metric-sub" id="modelShort">Model: --</div>
+      </div>
+
+      <div class="metric-card" data-tile="cpuram" title="Click tile to cycle: Bar Slider → Gauge → Graph → Histogram">
+        <div class="metric-head">
+          <span>Host CPU &amp; RAM</span>
+          <div class="metric-head-right">
+            <span class="metric-tag">Ryzen 5 5600</span>
+            <span class="mode-badge" id="modeBadge-cpuram">BAR</span>
+          </div>
+        </div>
+        <div class="dual-mini">
+          <div class="metric-val" style="font-size:1.18rem;">
+            <span id="cpuVal">--%</span>
+            <span class="metric-sub">CPU</span>
+          </div>
+          <div class="metric-val" style="font-size:1.18rem;">
+            <span id="ramVal">-- GB</span>
+            <span id="ramPct" class="metric-sub">--%</span>
+          </div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-view" data-view="bar">
+            <div class="dual-mini">
+              <div class="slider-wrap" style="padding:7px 0;">
+                <div class="bar-track">
+                  <div class="bar-ticks"></div>
+                  <div id="cpuBar" class="bar-fill fill-cpu"></div>
+                  <div id="cpuThumb" class="slider-thumb"></div>
+                </div>
+              </div>
+              <div class="slider-wrap" style="padding:7px 0;">
+                <div class="bar-track">
+                  <div class="bar-ticks"></div>
+                  <div id="ramBar" class="bar-fill fill-ram"></div>
+                  <div id="ramThumb" class="slider-thumb" style="border-color:var(--emerald);"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="viz-view gauge-box hidden" data-view="gauge">
+            <div class="dual-mini" style="width:100%;align-items:center;">
+              <svg class="gauge-svg" style="width:100%;height:56px;" viewBox="0 0 140 76">
+                <path class="gauge-bg" d="M 18 66 A 52 52 0 0 1 122 66" />
+                <path id="cpuGaugeArc" class="gauge-arc" stroke="#06b6d4" d="M 18 66 A 52 52 0 0 1 122 66" />
+                <text id="cpuGaugeTxt" class="gauge-text" x="70" y="54">--%</text>
+                <text class="gauge-subtext" x="70" y="68">CPU</text>
+              </svg>
+              <svg class="gauge-svg" style="width:100%;height:56px;" viewBox="0 0 140 76">
+                <path class="gauge-bg" d="M 18 66 A 52 52 0 0 1 122 66" />
+                <path id="ramGaugeArc" class="gauge-arc" stroke="#10b981" d="M 18 66 A 52 52 0 0 1 122 66" />
+                <text id="ramGaugeTxt" class="gauge-text" x="70" y="54">--%</text>
+                <text class="gauge-subtext" x="70" y="68">RAM</text>
+              </svg>
+            </div>
+          </div>
+          <div class="viz-view hidden" data-view="graph">
+            <svg class="graph-svg" viewBox="0 0 220 58" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="gradCpu" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.32" />
+                  <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.02" />
+                </linearGradient>
+              </defs>
+              <line class="graph-grid" x1="0" y1="15" x2="220" y2="15" />
+              <line class="graph-grid" x1="0" y1="30" x2="220" y2="30" />
+              <line class="graph-grid" x1="0" y1="45" x2="220" y2="45" />
+              <polygon id="cpuGraphArea" fill="url(#gradCpu)" points="" />
+              <polyline id="cpuGraphLine" class="graph-line" stroke="#06b6d4" points="" />
+              <polyline id="ramGraphLine" class="graph-line" stroke="#10b981" stroke-dasharray="4 2" points="" />
+            </svg>
+          </div>
+          <div class="viz-view hidden" data-view="histogram">
+            <div class="dual-mini">
+              <div id="cpuHist" class="hist-bars"></div>
+              <div id="ramHist" class="hist-bars"></div>
+            </div>
+          </div>
+        </div>
+        <div class="metric-sub" id="ramTotalText">System RAM: -- / -- GB</div>
+      </div>
+    </section>
+
+    <!-- Main Control & Prompt Studio -->
+    <main class="main-grid">
+      <!-- Left: Model Control Card -->
+      <section class="card">
+        <div class="card-title">
+          <h2>Model Control</h2>
+          <span class="card-badge">Port 8080</span>
+        </div>
+
+        <div class="info-kv">
+          <span class="k">Active Model</span>
+          <span class="v" id="kvModel" title="">--</span>
+          <span class="k">Health</span>
+          <span class="v" id="kvHealth">--</span>
+          <span class="k">Slot 0 State</span>
+          <span class="v" id="kvSlot">--</span>
+          <span class="k">Context</span>
+          <span class="v" id="kvCtx">--</span>
+        </div>
+
+        <div class="field">
+          <label for="modelMode">Model Mode</label>
+          <select id="modelMode">
+            <option value="qwen27b_vram">27B 100% VRAM (IQ2_M + MTP)</option>
+            <option value="qwen27b">27B Hybrid (UD-Q4_K_XL)</option>
+            <option value="speculative14b">14B Coder (Q4_K_M + 0.5B Draft)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="reasoningBudget">Thinking Cap (Reasoning Budget)</label>
+          <select id="reasoningBudget">
+            <option value="256" selected>256 — Fast Cap (Recommended)</option>
+            <option value="0">0 — Off (Direct Answer)</option>
+            <option value="512">512 — Medium Cap</option>
+            <option value="-1">-1 — Unlimited</option>
+          </select>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnStartServer" class="btn-crimson" style="flex:1;">Load / Restart Model</button>
+          <button id="btnStopServer" class="btn-danger-outline">Unload Model (Free VRAM)</button>
+        </div>
+
+        <div id="serverActionBanner" class="status-banner">
+          <span>Ready. Port 8080 status monitored every 2s.</span>
+        </div>
+      </section>
+
+      <!-- Right: Prompt Studio & Pi Runner Card -->
+      <section class="card">
+        <div class="card-title">
+          <h2>Prompt Studio &amp; Pi Runner</h2>
+          <span class="card-badge">pi --provider afterburner</span>
+        </div>
+
+        <div class="field">
+          <label for="roughPrompt">
+            <span>Rough Prompt</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-weight:400;color:var(--text-dim);">Draft or dictate thoughts</span>
+              <button id="btnDictatePrompt" type="button" class="btn-ghost" style="padding:3px 8px;font-size:0.74rem;">🎙️ Voice Dictate</button>
+            </div>
+          </label>
+          <textarea id="roughPrompt" rows="4" spellcheck="true" autocorrect="on" autocapitalize="sentences" placeholder="e.g., check tests folder and fix any failing test or show gpu stats in strata"></textarea>
+        </div>
+
+        <div class="inline-controls">
+          <div class="field">
+            <label for="optEngine">Optimizer Engine</label>
+            <select id="optEngine">
+              <option value="local">Local 6700 XT (Port 8080)</option>
+              <option value="cloud">Cloud API</option>
+            </select>
+          </div>
+
+          <div class="field hidden" id="cloudProviderWrap">
+            <label for="cloudProvider">Cloud Provider</label>
+            <select id="cloudProvider">
+              <option value="openrouter">OpenRouter</option>
+              <option value="gemini">Google Gemini</option>
+            </select>
+          </div>
+
+          <div class="field hidden" id="cloudKeyWrap">
+            <label for="cloudApiKey">API Key (saved locally)</label>
+            <input id="cloudApiKey" type="password" placeholder="Optional if env var is set" autocomplete="off" />
+          </div>
+
+          <div class="btn-row" style="justify-content:flex-end;">
+            <button id="btnOptimize" class="btn-amber">Clean &amp; Optimize Prompt</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="optimizedPrompt">
+            <span>Optimized Prompt (Editable)</span>
+            <button id="btnCopyRough" type="button" class="btn-ghost" style="padding:3px 8px;font-size:0.74rem;">Copy Rough ↓</button>
+          </label>
+          <textarea id="optimizedPrompt" rows="4" spellcheck="true" autocorrect="on" autocapitalize="sentences" placeholder="Optimized action-first prompt will appear here (or edit/type directly before sending to Pi)..."></textarea>
+        </div>
+
+        <div class="btn-row" style="justify-content:space-between;">
+          <div class="btn-row">
+            <button id="btnRunPi" class="btn-cyan">Send to Pi (Run Now)</button>
+            <button id="btnOpenPiTerminal" class="btn-ghost">Open Interactive Pi Terminal</button>
+          </div>
+          <span id="piTimer" class="timer-badge">Elapsed: 0.0s</span>
+        </div>
+
+        <div id="piStatusBanner" class="status-banner">
+          <span>Idle. Ready to optimize or dispatch to Pi.</span>
+        </div>
+
+        <div class="field">
+          <label>
+            <span>Pi Output</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button id="btnAutoSpeak" type="button" class="btn-ghost" style="padding:3px 8px;font-size:0.74rem;">🔊 Auto-Speak: OFF</button>
+              <button id="btnSpeakOutput" type="button" class="btn-ghost" style="padding:3px 8px;font-size:0.74rem;">🔊 Read Aloud</button>
+              <button id="btnClearOutput" type="button" class="btn-ghost" style="padding:3px 8px;font-size:0.74rem;">Clear</button>
+            </div>
+          </label>
+          <pre id="piOutput" class="output-box">Output from AfterBurner Pi will appear here...</pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const els = {
+      serverPill: document.getElementById("serverPill"),
+      serverPillText: document.getElementById("serverPillText"),
+      slotPill: document.getElementById("slotPill"),
+      slotPillText: document.getElementById("slotPillText"),
+      ctxPill: document.getElementById("ctxPill"),
+      pollPill: document.getElementById("pollPill"),
+      lanPill: document.getElementById("lanPill"),
+
+      vramVal: document.getElementById("vramVal"),
+      vramPct: document.getElementById("vramPct"),
+      vramBar: document.getElementById("vramBar"),
+      vramThumb: document.getElementById("vramThumb"),
+      vramGaugeArc: document.getElementById("vramGaugeArc"),
+      vramGaugeTxt: document.getElementById("vramGaugeTxt"),
+      vramGraphLine: document.getElementById("vramGraphLine"),
+      vramGraphArea: document.getElementById("vramGraphArea"),
+      vramHist: document.getElementById("vramHist"),
+
+      sharedVal: document.getElementById("sharedVal"),
+      sharedBar: document.getElementById("sharedBar"),
+      sharedThumb: document.getElementById("sharedThumb"),
+      sharedGaugeArc: document.getElementById("sharedGaugeArc"),
+      sharedGaugeTxt: document.getElementById("sharedGaugeTxt"),
+      sharedGraphLine: document.getElementById("sharedGraphLine"),
+      sharedGraphArea: document.getElementById("sharedGraphArea"),
+      sharedHist: document.getElementById("sharedHist"),
+
+      gpuCompVal: document.getElementById("gpuCompVal"),
+      gpuCompBar: document.getElementById("gpuCompBar"),
+      gpuCompThumb: document.getElementById("gpuCompThumb"),
+      compGaugeArc: document.getElementById("compGaugeArc"),
+      compGaugeTxt: document.getElementById("compGaugeTxt"),
+      compGraphLine: document.getElementById("compGraphLine"),
+      compGraphArea: document.getElementById("compGraphArea"),
+      compHist: document.getElementById("compHist"),
+      modelShort: document.getElementById("modelShort"),
+
+      cpuVal: document.getElementById("cpuVal"),
+      cpuBar: document.getElementById("cpuBar"),
+      cpuThumb: document.getElementById("cpuThumb"),
+      cpuGaugeArc: document.getElementById("cpuGaugeArc"),
+      cpuGaugeTxt: document.getElementById("cpuGaugeTxt"),
+      cpuGraphLine: document.getElementById("cpuGraphLine"),
+      cpuGraphArea: document.getElementById("cpuGraphArea"),
+      cpuHist: document.getElementById("cpuHist"),
+
+      ramVal: document.getElementById("ramVal"),
+      ramPct: document.getElementById("ramPct"),
+      ramBar: document.getElementById("ramBar"),
+      ramThumb: document.getElementById("ramThumb"),
+      ramGaugeArc: document.getElementById("ramGaugeArc"),
+      ramGaugeTxt: document.getElementById("ramGaugeTxt"),
+      ramGraphLine: document.getElementById("ramGraphLine"),
+      ramHist: document.getElementById("ramHist"),
+      ramTotalText: document.getElementById("ramTotalText"),
+
+      kvModel: document.getElementById("kvModel"),
+      kvHealth: document.getElementById("kvHealth"),
+      kvSlot: document.getElementById("kvSlot"),
+      kvCtx: document.getElementById("kvCtx"),
+
+      modelMode: document.getElementById("modelMode"),
+      reasoningBudget: document.getElementById("reasoningBudget"),
+      btnStartServer: document.getElementById("btnStartServer"),
+      btnStopServer: document.getElementById("btnStopServer"),
+      serverActionBanner: document.getElementById("serverActionBanner"),
+
+      roughPrompt: document.getElementById("roughPrompt"),
+      optEngine: document.getElementById("optEngine"),
+      cloudProviderWrap: document.getElementById("cloudProviderWrap"),
+      cloudProvider: document.getElementById("cloudProvider"),
+      cloudKeyWrap: document.getElementById("cloudKeyWrap"),
+      cloudApiKey: document.getElementById("cloudApiKey"),
+      btnOptimize: document.getElementById("btnOptimize"),
+      btnCopyRough: document.getElementById("btnCopyRough"),
+      optimizedPrompt: document.getElementById("optimizedPrompt"),
+      btnRunPi: document.getElementById("btnRunPi"),
+      btnOpenPiTerminal: document.getElementById("btnOpenPiTerminal"),
+      piTimer: document.getElementById("piTimer"),
+      piStatusBanner: document.getElementById("piStatusBanner"),
+      piOutput: document.getElementById("piOutput"),
+      btnDictatePrompt: document.getElementById("btnDictatePrompt"),
+      btnAutoSpeak: document.getElementById("btnAutoSpeak"),
+      btnSpeakOutput: document.getElementById("btnSpeakOutput"),
+      btnClearOutput: document.getElementById("btnClearOutput"),
+    };
+
+    let pollingInFlight = false;
+    let piTimerHandle = null;
+
+    const VIZ_MODES = ["bar", "gauge", "graph", "histogram"];
+    const VIZ_LABELS = { bar: "BAR", gauge: "GAUGE", graph: "GRAPH", histogram: "HIST" };
+    const HISTORY_MAX = 30;
+    const HIST_BARS = 24;
+    const GAUGE_ARC_LEN = 163.36;
+
+    const history = {
+      vram: [],
+      shared: [],
+      compute: [],
+      cpu: [],
+      ram: [],
+    };
+
+    function pushHistory(key, val) {
+      const arr = history[key];
+      arr.push(Math.min(100, Math.max(0, Number(val || 0))));
+      if (arr.length > HISTORY_MAX) arr.shift();
+    }
+
+    function applyTileMode(card, mode) {
+      const tileId = card.getAttribute("data-tile");
+      const safeMode = VIZ_MODES.includes(mode) ? mode : "bar";
+      card.setAttribute("data-mode", safeMode);
+      const badge = document.getElementById(`modeBadge-${tileId}`);
+      if (badge) badge.textContent = VIZ_LABELS[safeMode];
+      card.querySelectorAll(".viz-view").forEach((view) => {
+        view.classList.toggle("hidden", view.getAttribute("data-view") !== safeMode);
+      });
+    }
+
+    document.querySelectorAll(".metric-card[data-tile]").forEach((card) => {
+      const tileId = card.getAttribute("data-tile");
+      const saved = localStorage.getItem(`afterburner_tile_${tileId}`) || "bar";
+      applyTileMode(card, saved);
+      card.addEventListener("click", () => {
+        const cur = card.getAttribute("data-mode") || "bar";
+        const next = VIZ_MODES[(VIZ_MODES.indexOf(cur) + 1) % VIZ_MODES.length];
+        localStorage.setItem(`afterburner_tile_${tileId}`, next);
+        applyTileMode(card, next);
+      });
+    });
+
+    function setBarSlider(barEl, thumbEl, pct) {
+      const clamped = Math.min(100, Math.max(0, Number(pct || 0)));
+      barEl.style.width = `${clamped}%`;
+      if (thumbEl) thumbEl.style.left = `${clamped}%`;
+    }
+
+    function setGauge(arcEl, txtEl, pct) {
+      const clamped = Math.min(100, Math.max(0, Number(pct || 0)));
+      if (arcEl) {
+        arcEl.style.strokeDashoffset = (GAUGE_ARC_LEN * (1 - clamped / 100)).toFixed(2);
+      }
+      if (txtEl) {
+        txtEl.textContent = `${fmtNum(clamped, 0)}%`;
+      }
+    }
+
+    function setLineGraph(lineEl, areaEl, series) {
+      if (!lineEl || series.length === 0) return;
+      const w = 220;
+      const h = 58;
+      const pad = 4;
+      const n = series.length;
+      const pts = series.map((v, i) => {
+        const x = n === 1 ? w : (i / (n - 1)) * w;
+        const y = h - pad - (Math.min(100, Math.max(0, v)) / 100) * (h - pad * 2);
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      });
+      lineEl.setAttribute("points", pts.join(" "));
+      if (areaEl) {
+        areaEl.setAttribute("points", `0,${h} ${pts.join(" ")} ${w},${h}`);
+      }
+    }
+
+    function setHistogram(containerEl, series, color, barCount = HIST_BARS) {
+      if (!containerEl) return;
+      const slice = series.slice(-barCount);
+      const padCount = Math.max(0, barCount - slice.length);
+      const bars = [];
+      for (let i = 0; i < padCount; i++) {
+        bars.push(`<div class="hist-bar" style="height:2px;background:${color};opacity:0.12;"></div>`);
+      }
+      slice.forEach((v, idx) => {
+        const pct = Math.min(100, Math.max(4, Number(v || 0)));
+        const opacity = 0.35 + (idx / Math.max(1, slice.length - 1)) * 0.65;
+        bars.push(`<div class="hist-bar" style="height:${pct.toFixed(0)}%;background:${color};opacity:${opacity.toFixed(2)};"></div>`);
+      });
+      containerEl.innerHTML = bars.join("");
+    }
+
+    function setBanner(el, msg, kind = "") {
+      el.className = "status-banner" + (kind ? " " + kind : "");
+      el.textContent = msg;
+    }
+
+    function fmtNum(n, digits = 0) {
+      if (n === null || n === undefined || Number.isNaN(Number(n))) return "--";
+      return Number(n).toLocaleString(undefined, {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits,
+      });
+    }
+
+    function updateTelemetryUI(data) {
+      const gpu = data.gpu || {};
+      const sys = data.system || {};
+      const srv = data.server || {};
+
+      // Dedicated VRAM
+      const vramMb = Number(gpu.vramUsedMb || 0);
+      const vramPct = Math.min(100, Math.max(0, Number(gpu.vramPercent || 0)));
+      els.vramVal.textContent = `${fmtNum(vramMb, 0)} MB`;
+      els.vramPct.textContent = `${fmtNum(vramPct, 1)}%`;
+      pushHistory("vram", vramPct);
+      setBarSlider(els.vramBar, els.vramThumb, vramPct);
+      setGauge(els.vramGaugeArc, els.vramGaugeTxt, vramPct);
+      setLineGraph(els.vramGraphLine, els.vramGraphArea, history.vram);
+      setHistogram(els.vramHist, history.vram, "#06b6d4");
+
+      // Shared GPU Memory
+      const sharedMb = Number(gpu.sharedUsedMb || 0);
+      const sharedPct = Math.min(100, (sharedMb / 4096) * 100);
+      els.sharedVal.textContent = `${fmtNum(sharedMb, 0)} MB`;
+      pushHistory("shared", sharedPct);
+      setBarSlider(els.sharedBar, els.sharedThumb, sharedPct);
+      setGauge(els.sharedGaugeArc, els.sharedGaugeTxt, sharedPct);
+      setLineGraph(els.sharedGraphLine, els.sharedGraphArea, history.shared);
+      setHistogram(els.sharedHist, history.shared, "#f59e0b");
+
+      // GPU Compute
+      const compPct = Math.min(100, Math.max(0, Number(gpu.computePercent || 0)));
+      els.gpuCompVal.textContent = `${fmtNum(compPct, 1)}%`;
+      pushHistory("compute", compPct);
+      setBarSlider(els.gpuCompBar, els.gpuCompThumb, compPct);
+      setGauge(els.compGaugeArc, els.compGaugeTxt, compPct);
+      setLineGraph(els.compGraphLine, els.compGraphArea, history.compute);
+      setHistogram(els.compHist, history.compute, "#ef233c");
+
+      // CPU & RAM
+      const cpuPct = Math.min(100, Math.max(0, Number(sys.cpuPercent || 0)));
+      els.cpuVal.textContent = `${fmtNum(cpuPct, 1)}%`;
+      pushHistory("cpu", cpuPct);
+      setBarSlider(els.cpuBar, els.cpuThumb, cpuPct);
+      setGauge(els.cpuGaugeArc, els.cpuGaugeTxt, cpuPct);
+
+      const ramUsed = Number(sys.ramUsedGb || 0);
+      const ramTotal = Number(sys.ramTotalGb || 0);
+      const ramPct = Math.min(100, Math.max(0, Number(sys.ramPercent || 0)));
+      els.ramVal.textContent = `${fmtNum(ramUsed, 1)} GB`;
+      els.ramPct.textContent = `${fmtNum(ramPct, 1)}%`;
+      els.ramTotalText.textContent = `System RAM: ${fmtNum(ramUsed, 1)} / ${fmtNum(ramTotal, 1)} GB`;
+      pushHistory("ram", ramPct);
+      setBarSlider(els.ramBar, els.ramThumb, ramPct);
+      setGauge(els.ramGaugeArc, els.ramGaugeTxt, ramPct);
+      setLineGraph(els.cpuGraphLine, els.cpuGraphArea, history.cpu);
+      setLineGraph(els.ramGraphLine, null, history.ram);
+      setHistogram(els.cpuHist, history.cpu, "#06b6d4", 12);
+      setHistogram(els.ramHist, history.ram, "#10b981", 12);
+
+      // Server Pills & Card KV
+      const online = Boolean(srv.online);
+      const health = srv.health || "offline";
+      const slotState = srv.slotState || (online ? "idle" : "offline");
+      const modelName = srv.model || "None loaded";
+      const nCtx = srv.nCtx ? fmtNum(srv.nCtx, 0) : "--";
+
+      if (online) {
+        els.serverPill.className = "pill online";
+        els.serverPillText.textContent = "SERVER: ONLINE";
+      } else if (health === "loading") {
+        els.serverPill.className = "pill loading";
+        els.serverPillText.textContent = "SERVER: LOADING";
+      } else {
+        els.serverPill.className = "pill offline";
+        els.serverPillText.textContent = "SERVER: OFFLINE";
+      }
+
+      if (slotState === "generating") {
+        els.slotPill.className = "pill generating";
+        els.slotPillText.textContent = "SLOT 0: GENERATING";
+      } else if (online) {
+        els.slotPill.className = "pill online";
+        els.slotPillText.textContent = "SLOT 0: IDLE";
+      } else {
+        els.slotPill.className = "pill offline";
+        els.slotPillText.textContent = `SLOT 0: ${slotState.toUpperCase()}`;
+      }
+
+      els.ctxPill.textContent = `CTX: ${nCtx}`;
+      els.pollPill.textContent = `POLL: ${new Date().toLocaleTimeString()}`;
+      if (data.lanUrl) {
+        els.lanPill.textContent = `Phone LAN: ${data.lanUrl}`;
+      }
+
+      els.modelShort.textContent = `Model: ${modelName}`;
+      els.kvModel.textContent = modelName;
+      els.kvModel.title = srv.modelPath || modelName;
+      els.kvHealth.textContent = health.toUpperCase();
+      els.kvSlot.textContent = slotState.toUpperCase() + (srv.speculative ? " (SPEC)" : "");
+      els.kvCtx.textContent = nCtx;
+    }
+
+    async function pollTelemetry() {
+      if (pollingInFlight) return;
+      pollingInFlight = true;
+      try {
+        const res = await fetch("/api/telemetry", { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        updateTelemetryUI(data);
+      } catch (err) {
+        els.serverPill.className = "pill offline";
+        els.serverPillText.textContent = "DASHBOARD LINK ERR";
+      } finally {
+        pollingInFlight = false;
+      }
+    }
+
+    async function postJson(url, payload) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload || {}),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error || `Request failed with HTTP ${res.status}`);
+      }
+      return data;
+    }
+
+    // Cloud selector & localStorage persistence
+    function syncCloudVisibility() {
+      const isCloud = els.optEngine.value === "cloud";
+      els.cloudProviderWrap.classList.toggle("hidden", !isCloud);
+      els.cloudKeyWrap.classList.toggle("hidden", !isCloud);
+      if (isCloud) {
+        const keyStorageName = `afterburner_key_${els.cloudProvider.value}`;
+        els.cloudApiKey.value = localStorage.getItem(keyStorageName) || "";
+      }
+    }
+
+    els.optEngine.value = localStorage.getItem("afterburner_opt_engine") || "local";
+    els.cloudProvider.value = localStorage.getItem("afterburner_cloud_provider") || "openrouter";
+    syncCloudVisibility();
+
+    els.optEngine.addEventListener("change", () => {
+      localStorage.setItem("afterburner_opt_engine", els.optEngine.value);
+      syncCloudVisibility();
+    });
+    els.cloudProvider.addEventListener("change", () => {
+      localStorage.setItem("afterburner_cloud_provider", els.cloudProvider.value);
+      syncCloudVisibility();
+    });
+    els.cloudApiKey.addEventListener("input", () => {
+      const keyStorageName = `afterburner_key_${els.cloudProvider.value}`;
+      localStorage.setItem(keyStorageName, els.cloudApiKey.value);
+    });
+
+    // Server Start / Stop handlers
+    els.btnStartServer.addEventListener("click", async () => {
+      const mode = els.modelMode.value;
+      const reasoningBudget = Number(els.reasoningBudget.value);
+      els.btnStartServer.disabled = true;
+      els.btnStopServer.disabled = true;
+      setBanner(els.serverActionBanner, `Launching ${mode} (budget=${reasoningBudget})... waiting up to 20s for /health.`, "busy");
+      try {
+        const res = await postJson("/api/server/start", { mode, reasoningBudget });
+        setBanner(
+          els.serverActionBanner,
+          res.ready
+            ? `Loaded ${mode} (PID ${res.launcherPid || "?"}). Server online.`
+            : `Launched ${mode} (PID ${res.launcherPid || "?"}). Still loading weights into VRAM...`,
+          res.ready ? "ok" : "busy"
+        );
+        pollTelemetry();
+      } catch (err) {
+        setBanner(els.serverActionBanner, `Start error: ${err.message}`, "err");
+      } finally {
+        els.btnStartServer.disabled = false;
+        els.btnStopServer.disabled = false;
+      }
+    });
+
+    els.btnStopServer.addEventListener("click", async () => {
+      els.btnStartServer.disabled = true;
+      els.btnStopServer.disabled = true;
+      setBanner(els.serverActionBanner, "Stopping llama-server.exe and freeing VRAM...", "busy");
+      try {
+        await postJson("/api/server/stop", {});
+        setBanner(els.serverActionBanner, "llama-server.exe stopped. 12 GB VRAM released.", "ok");
+        pollTelemetry();
+      } catch (err) {
+        setBanner(els.serverActionBanner, `Stop error: ${err.message}`, "err");
+      } finally {
+        els.btnStartServer.disabled = false;
+        els.btnStopServer.disabled = false;
+      }
+    });
+
+    // Prompt Optimize
+    els.btnCopyRough.addEventListener("click", () => {
+      els.optimizedPrompt.value = els.roughPrompt.value;
+    });
+
+    els.btnOptimize.addEventListener("click", async () => {
+      const prompt = els.roughPrompt.value.trim();
+      if (!prompt) {
+        setBanner(els.piStatusBanner, "Enter a rough prompt first.", "err");
+        return;
+      }
+      els.btnOptimize.disabled = true;
+      const engine = els.optEngine.value;
+      const provider = els.cloudProvider.value;
+      const apiKey = els.cloudApiKey.value;
+      setBanner(els.piStatusBanner, `Optimizing prompt via ${engine === "local" ? "RX 6700 XT" : provider}...`, "busy");
+      try {
+        const res = await postJson("/api/prompt/optimize", { prompt, engine, provider, apiKey });
+        els.optimizedPrompt.value = res.optimizedPrompt || "";
+        setBanner(els.piStatusBanner, `Prompt optimized via ${res.provider || engine}. Review and click Send to Pi.`, "ok");
+      } catch (err) {
+        setBanner(els.piStatusBanner, `Optimize failed: ${err.message}`, "err");
+      } finally {
+        els.btnOptimize.disabled = false;
+      }
+    });
+
+    // Pi Run
+    els.btnRunPi.addEventListener("click", async () => {
+      const prompt = (els.optimizedPrompt.value || els.roughPrompt.value).trim();
+      if (!prompt) {
+        setBanner(els.piStatusBanner, "Enter a prompt in Optimized Prompt (or Rough Prompt) first.", "err");
+        return;
+      }
+      els.btnRunPi.disabled = true;
+      const startMs = performance.now();
+      clearInterval(piTimerHandle);
+      piTimerHandle = setInterval(() => {
+        const sec = (performance.now() - startMs) / 1000;
+        els.piTimer.textContent = `Elapsed: ${sec.toFixed(1)}s`;
+      }, 100);
+
+      setBanner(els.piStatusBanner, "Running Pi agent (--print) in C:\\Users\\6700XT\\Documents\\Strata...", "busy");
+      els.piOutput.textContent = "Executing Pi... awaiting output...";
+      try {
+        const res = await postJson("/api/pi/run", { prompt });
+        els.piTimer.textContent = `Elapsed: ${Number(res.elapsedSeconds || 0).toFixed(2)}s`;
+        const replyText = res.output || "(No output returned)";
+        els.piOutput.textContent = replyText;
+        setBanner(
+          els.piStatusBanner,
+          `Pi completed in ${Number(res.elapsedSeconds || 0).toFixed(2)}s (exit code ${res.returncode}).`,
+          res.returncode === 0 ? "ok" : "err"
+        );
+        if (autoSpeakEnabled && res.output) {
+          speakText(replyText);
+        }
+      } catch (err) {
+        els.piOutput.textContent = `Error: ${err.message}`;
+        setBanner(els.piStatusBanner, `Pi execution failed: ${err.message}`, "err");
+      } finally {
+        clearInterval(piTimerHandle);
+        els.btnRunPi.disabled = false;
+      }
+    });
+
+    // Open Interactive Pi Terminal
+    els.btnOpenPiTerminal.addEventListener("click", async () => {
+      els.btnOpenPiTerminal.disabled = true;
+      setBanner(els.piStatusBanner, "Opening interactive Pi terminal (Launch_Pi.bat)...", "busy");
+      try {
+        const res = await postJson("/api/pi/open-terminal", {});
+        setBanner(els.piStatusBanner, `Interactive Pi terminal launched (PID ${res.pid || "?"}).`, "ok");
+      } catch (err) {
+        setBanner(els.piStatusBanner, `Terminal launch error: ${err.message}`, "err");
+      } finally {
+        els.btnOpenPiTerminal.disabled = false;
+      }
+    });
+
+    els.btnClearOutput.addEventListener("click", () => {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      els.piOutput.textContent = "";
+      els.piTimer.textContent = "Elapsed: 0.0s";
+    });
+
+    // Voice Call Mode: Dictation + TTS Read-Aloud
+    let autoSpeakEnabled = localStorage.getItem("afterburner_auto_speak") !== "false";
+    let activeRecognition = null;
+
+    function syncAutoSpeakUI() {
+      els.btnAutoSpeak.textContent = autoSpeakEnabled ? "🔊 Auto-Speak: ON" : "🔊 Auto-Speak: OFF";
+      els.btnAutoSpeak.classList.toggle("btn-voice-active", autoSpeakEnabled);
+    }
+    syncAutoSpeakUI();
+
+    function cleanSpeechText(rawText) {
+      return String(rawText || "")
+        .replace(/```[\s\S]*?```/g, " code block omitted. ")
+        .replace(/`([^`]+)`/g, "$1")
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        .replace(/[*_#>~]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function speakText(rawText) {
+      if (!("speechSynthesis" in window)) {
+        setBanner(els.piStatusBanner, "Browser text-to-speech is not supported in this browser.", "err");
+        return;
+      }
+      const spoken = cleanSpeechText(rawText);
+      if (!spoken) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(spoken);
+      utterance.rate = 1.02;
+      utterance.onstart = () => {
+        els.btnSpeakOutput.textContent = "⏹️ Stop Speaking";
+        els.btnSpeakOutput.classList.add("btn-voice-active");
+      };
+      const resetSpeakBtn = () => {
+        els.btnSpeakOutput.textContent = "🔊 Read Aloud";
+        els.btnSpeakOutput.classList.remove("btn-voice-active");
+      };
+      utterance.onend = resetSpeakBtn;
+      utterance.onerror = resetSpeakBtn;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    els.btnAutoSpeak.addEventListener("click", () => {
+      autoSpeakEnabled = !autoSpeakEnabled;
+      localStorage.setItem("afterburner_auto_speak", String(autoSpeakEnabled));
+      syncAutoSpeakUI();
+      if (!autoSpeakEnabled && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    });
+
+    els.btnSpeakOutput.addEventListener("click", () => {
+      if (!("speechSynthesis" in window)) {
+        setBanner(els.piStatusBanner, "Browser text-to-speech is unavailable here.", "err");
+        return;
+      }
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        els.btnSpeakOutput.textContent = "🔊 Read Aloud";
+        els.btnSpeakOutput.classList.remove("btn-voice-active");
+        return;
+      }
+      const text = els.piOutput.textContent.trim();
+      if (!text || text === "Output from AfterBurner Pi will appear here...") {
+        setBanner(els.piStatusBanner, "No Pi output to read aloud yet.", "err");
+        return;
+      }
+      speakText(text);
+    });
+
+    els.btnDictatePrompt.addEventListener("click", () => {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const isLocalHost = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+      if (!SpeechRec || (!window.isSecureContext && !isLocalHost)) {
+        els.roughPrompt.focus();
+        setBanner(
+          els.piStatusBanner,
+          "Phone HTTP LAN note: tap the 🎙️ Microphone key on your phone's pop-up keyboard to dictate directly into Rough Prompt.",
+          "busy"
+        );
+        return;
+      }
+      if (activeRecognition) {
+        activeRecognition.stop();
+        return;
+      }
+      const rec = new SpeechRec();
+      rec.lang = "en-US";
+      rec.interimResults = false;
+      rec.continuous = false;
+      activeRecognition = rec;
+      els.btnDictatePrompt.textContent = "🛑 Stop Listening";
+      els.btnDictatePrompt.classList.add("btn-voice-active");
+      setBanner(els.piStatusBanner, "Listening... speak your prompt now.", "busy");
+
+      rec.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map((r) => r[0]?.transcript || "")
+          .join(" ")
+          .trim();
+        if (transcript) {
+          const cur = els.roughPrompt.value.trim();
+          els.roughPrompt.value = cur ? `${cur} ${transcript}` : transcript;
+          setBanner(els.piStatusBanner, "Voice transcribed into Rough Prompt.", "ok");
+        }
+      };
+      rec.onerror = (event) => {
+        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+          els.roughPrompt.focus();
+          setBanner(
+            els.piStatusBanner,
+            "Mic permission blocked on HTTP — focus Rough Prompt and tap the 🎙️ Microphone key on your phone's keyboard.",
+            "err"
+          );
+        } else {
+          setBanner(els.piStatusBanner, `Voice dictation error: ${event.error}`, "err");
+        }
+      };
+      rec.onend = () => {
+        activeRecognition = null;
+        els.btnDictatePrompt.textContent = "🎙️ Voice Dictate";
+        els.btnDictatePrompt.classList.remove("btn-voice-active");
+      };
+      rec.start();
+    });
+
+    pollTelemetry();
+    setInterval(pollTelemetry, 2000);
+  </script>
+</body>
+</html>

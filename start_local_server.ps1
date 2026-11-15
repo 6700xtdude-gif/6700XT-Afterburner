@@ -5,7 +5,9 @@ param(
     [int]$K = 3,
     [int]$CtxSize = 65536,
     [string]$Ctk = "q8_0",
-    [string]$Ctv = "q8_0"
+    [string]$Ctv = "q8_0",
+    [int]$ReasoningBudget = 256,
+    [string]$ReasoningBudgetMessage = "Thinking budget reached. Proceeding directly to tool call or final response."
 )
 
 $RootDir = $PSScriptRoot
@@ -35,6 +37,7 @@ if ($Mode -eq "qwen27b_vram") {
     Write-Host " Speculation: Native Multi-Token Prediction (K=2)" -ForegroundColor White
     Write-Host " Speed: Up to 25.1 tokens/sec on Navi 22 (6.25x speedup!)" -ForegroundColor White
     Write-Host " KV Cache: $Ctk/$Ctv + FlashAttention ($CtxSize context)" -ForegroundColor White
+    Write-Host " Reasoning: Capped at $ReasoningBudget tokens/turn (reasoning preserved)" -ForegroundColor White
     Write-Host "==========================================================" -ForegroundColor Cyan
 
     & "$BinDir\llama-server.exe" `
@@ -49,7 +52,9 @@ if ($Mode -eq "qwen27b_vram") {
         -fa on `
         -ctk $Ctk `
         -ctv $Ctv `
-        -c $CtxSize
+        -c $CtxSize `
+        --reasoning-budget $ReasoningBudget `
+        --reasoning-budget-message "$ReasoningBudgetMessage"
 } elseif ($Mode -eq "qwen27b") {
     $Host.UI.RawUI.WindowTitle = "6700XT-Afterburner: Local Vulkan 27B Hybrid Server (RX 6700 XT)"
     $ModelPath = Join-Path $RootDir "Models\Qwen3.8-27B-UD-Q4_K_XL\Qwen3.8-27B-UD-Q4_K_XL.gguf"
@@ -82,7 +87,9 @@ if ($Mode -eq "qwen27b_vram") {
         -ctk $Ctk `
         -ctv $Ctv `
         -c $CtxSize `
-        --cache-reuse 64
+        --cache-reuse 64 `
+        --reasoning-budget $ReasoningBudget `
+        --reasoning-budget-message "$ReasoningBudgetMessage"
 } elseif ($Mode -eq "moe35b") {
     $Host.UI.RawUI.WindowTitle = "6700XT-Afterburner: Local Vulkan 35B MoE Server (RX 6700 XT)"
     $ModelPath = Join-Path $RootDir "Models\qwen36-UD-Q4_K_XL\Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf"
