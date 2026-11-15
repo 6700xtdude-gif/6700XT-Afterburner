@@ -1,0 +1,178 @@
+{
+  "generatedAt": "2026-11-15T03:23:53.932458+00:00",
+  "questions": {
+    "1": {
+      "qid": 1,
+      "name": "Q1: System Identity & Hardware",
+      "prompt": "Using PowerShell, check and report this computer's exact hostname, Windows build number, GPU model, and total installed RAM in GB.",
+      "prompt_match_substrings": [
+        "hostname",
+        "name of this computer"
+      ],
+      "expected_groups": [
+        [
+          "sandbox"
+        ],
+        [
+          "26300",
+          "26100"
+        ],
+        [
+          "6700 xt",
+          "6700xt"
+        ],
+        [
+          "64",
+          "63.9",
+          "63.8"
+        ]
+      ]
+    },
+    "2": {
+      "qid": 2,
+      "name": "Q2: Stopped Automatic Services & Top RAM",
+      "prompt": "Using PowerShell, list any Automatic-start Windows services that are currently Stopped, plus the top 3 processes by RAM usage. Do not modify anything.",
+      "prompt_match_substrings": [
+        "automatic-start",
+        "stopped"
+      ],
+      "expected_groups": [
+        [
+          "mapsbroker",
+          "downloaded maps"
+        ],
+        [
+          "stopped"
+        ],
+        [
+          "llama-server",
+          "mb",
+          "gb"
+        ]
+      ]
+    },
+    "3": {
+      "qid": 3,
+      "name": "Q3: Event Log 3-Error Root Cause Triage",
+      "prompt": "list the last three unique error messages in windows 'administer events', conduct root cause analysis, investigate error and web research each error, return to me your recommendations for remediation, don't fix anything yet, just tell what is broke and how I can fix it.",
+      "prompt_match_substrings": [
+        "unique error messages",
+        "administer events"
+      ],
+      "expected_groups": [
+        [
+          "mapsbroker",
+          "downloaded maps",
+          "7023"
+        ],
+        [
+          "2042",
+          "firewall"
+        ],
+        [
+          "10010",
+          "dcom",
+          "9ba05972"
+        ],
+        [
+          "benign",
+          "harmless",
+          "ignore",
+          "noise",
+          "not broken",
+          "nothing is actually broken"
+        ],
+        [
+          "disabled",
+          "disable"
+        ]
+      ]
+    }
+  },
+  "results": [
+    {
+      "sessionFile": "2026-11-14T20-02-35-031Z_01a1dba7-9397-7166-8f85-296d445ae6dc.jsonl",
+      "questionId": 3,
+      "questionName": "Q3: Event Log 3-Error Root Cause Triage",
+      "wallClockSec": 878.2,
+      "assistantTurns": 13,
+      "totalOutputTokens": 10132,
+      "peakContextTokens": 23920,
+      "toolCalls": 26,
+      "toolErrors": 5,
+      "toolSuccessPct": 80.8,
+      "resultScorePct": 0.0,
+      "matchedKeywords": [],
+      "missedKeywords": [
+        "mapsbroker / downloaded maps / 7023",
+        "2042 / firewall",
+        "10010 / dcom / 9ba05972",
+        "benign / harmless / ignore / noise / not broken / nothing is actually broken",
+        "disabled / disable"
+      ]
+    },
+    {
+      "sessionFile": "2026-11-14T20-22-38-941Z_01a1dbb9-f25c-72b6-8b5f-96c974f23db3.jsonl",
+      "questionId": 3,
+      "questionName": "Q3: Event Log 3-Error Root Cause Triage",
+      "wallClockSec": 438.4,
+      "assistantTurns": 16,
+      "totalOutputTokens": 6213,
+      "peakContextTokens": 14219,
+      "toolCalls": 16,
+      "toolErrors": 7,
+      "toolSuccessPct": 56.2,
+      "resultScorePct": 0.0,
+      "matchedKeywords": [],
+      "missedKeywords": [
+        "mapsbroker / downloaded maps / 7023",
+        "2042 / firewall",
+        "10010 / dcom / 9ba05972",
+        "benign / harmless / ignore / noise / not broken / nothing is actually broken",
+        "disabled / disable"
+      ]
+    },
+    {
+      "sessionFile": "2026-11-15T01-46-47-725Z_01a1dce2-b62c-75e1-aa22-a0024eaa8286.jsonl",
+      "questionId": 3,
+      "questionName": "Q3: Event Log 3-Error Root Cause Triage",
+      "wallClockSec": 1262.2,
+      "assistantTurns": 11,
+      "totalOutputTokens": 15942,
+      "peakContextTokens": 34778,
+      "toolCalls": 19,
+      "toolErrors": 3,
+      "toolSuccessPct": 84.2,
+      "resultScorePct": 100.0,
+      "matchedKeywords": [
+        "mapsbroker",
+        "2042",
+        "10010",
+        "benign",
+        "disabled"
+      ],
+      "missedKeywords": []
+    },
+    {
+      "sessionFile": "2026-11-15T02-46-42-959Z_01a1dd19-920f-748a-9c9a-0a2ad69f2202.jsonl",
+      "questionId": 3,
+      "questionName": "Q3: Event Log 3-Error Root Cause Triage",
+      "wallClockSec": 1996.1,
+      "assistantTurns": 36,
+      "totalOutputTokens": 16297,
+      "peakContextTokens": 44672,
+      "toolCalls": 61,
+      "toolErrors": 19,
+      "toolSuccessPct": 68.9,
+      "resultScorePct": 100.0,
+      "matchedKeywords": [
+        "mapsbroker",
+        "2042",
+        "10010",
+        "benign",
+        "disabled"
+      ],
+      "missedKeywords": []
+    }
+  ]
+}
