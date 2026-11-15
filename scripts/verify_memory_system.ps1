@@ -184,9 +184,25 @@ Test-Check "no plaintext credentials under Documents" {
 }
 
 # --- report -----------------------------------------------------------------
-$results | Format-Table -AutoSize -Property Status, Check, Detail
+# Plain text, not Format-Table: this script's exit code is consumed by
+# session_end.ps1, and Format-Table raises a pipeline error when the caller
+# pipes the output (e.g. `| Select-Object -Last 3`), which corrupts that code.
+$checkWidth = 0
+foreach ($r in $results) { if ($r.Check.Length -gt $checkWidth) { $checkWidth = $r.Check.Length } }
+$fmt = "{0,-6} {1,-" + $checkWidth + "}  {2}"
+foreach ($r in $results) {
+    $color = switch ($r.Status) {
+        "PASS" { "Green" }
+        "WARN" { "Yellow" }
+        "FAIL" { "Red" }
+        default { "Gray" }
+    }
+    Write-Host ($fmt -f $r.Status, $r.Check, $r.Detail) -ForegroundColor $color
+}
+$passCount = @($results | Where-Object Status -eq "PASS").Count
 $fails = @($results | Where-Object Status -eq "FAIL")
 $warns = @($results | Where-Object Status -eq "WARN")
-Write-Host ("{0} pass, {1} warn, {2} fail" -f @($results | Where-Object Status -eq "PASS").Count, $warns.Count, $fails.Count) -ForegroundColor $(if ($fails.Count) { "Red" } elseif ($warns.Count) { "Yellow" } else { "Green" })
+Write-Host ""
+Write-Host ("{0} pass, {1} warn, {2} fail" -f $passCount, $warns.Count, $fails.Count) -ForegroundColor $(if ($fails.Count) { "Red" } elseif ($warns.Count) { "Yellow" } else { "Green" })
 
 if ($fails.Count -gt 0) { exit 1 } else { exit 0 }
