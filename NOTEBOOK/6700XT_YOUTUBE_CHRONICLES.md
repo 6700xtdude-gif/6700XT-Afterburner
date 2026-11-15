@@ -72,7 +72,19 @@
 
 ---
 
+## Episode 6 — The 45-Minute OS Migration: Why Your AI's Brain Lives in GitHub, Not Windows
+
+- **The Hook:** Everything on `SANDBOX` (`C:\Users\6700XT\Documents\Strata`) is malleable—not locked in stone. If we decide to wipe Windows or boot into Linux in 45 minutes, do we lose our AI's memory, preferences, and hard-won benchmarks?
+- **The 3-Layer Portability Architecture (Plain-English Breakdown):**
+  1. **Layer 1 — Account & IDE (`Antigravity` + `6700xtdude@gmail.com`):** Installing Antigravity on Linux and signing into your Google account restores your client, voice controls, and cloud profile—**not** your local project files.
+  2. **Layer 2 — The Portable "Brain" on GitHub (`6700XT-Afterburner`):** Because we store `AGENTS.md` (your persona and `"Aye aye, captain."` rules), `NOTEBOOK/` (`SYSTEM_BASELINE.md`, `6700XT_YOUTUBE_CHRONICLES.md`), `MEMORY/` (`EXPERIMENT_LOG.md`), and `dashboard/` as plain-text Markdown and Python files on GitHub, one `git clone https://github.com/6700xtdude-gif/6700XT-Afterburner.git` on Linux brings down the agent's entire working memory, dashboard, and benchmark suite in seconds.
+  3. **Layer 3 — The Heavy Weights (`Models/*.gguf` + Vulkan/ROCm `llama-server`):** GitHub holds the blueprint and memory (a few megabytes), not the 10–21 GB `.gguf` model weights. On Linux, you point `llama-server` (Vulkan or ROCm) at your existing `Models/` folder on a shared drive (or re-run the download scripts), and the rig is back up.
+- **What Changes vs. What Stays Identical on Linux:** Only the `.ps1`/`.bat` Windows startup wrappers and Windows-specific `SYSTEM_BASELINE.md` Event Log notes change (`bash` + systemd/Linux `llama-server`); the GGUF models, Python dashboard, benchmarks, persona rules, and chronicles carry straight across unchanged.
+- **Voice Script Beat:** *"Everyone thinks their AI's memory is trapped inside whatever app or Windows install they built it on. Because we pushed our rules, baseline notebook, and chronicles as plain Markdown into GitHub, Windows isn't the cage—it's just the current launcher. Wipe the drive, boot Linux, clone one repo, point at your GGUF weights, and your rig wakes up remembering everything in under 45 minutes."*
+
+---
+
 ## Upcoming Milestones (Logged for Future Episodes)
 
-- **Episode 6 (Next):** Local Planner / Executor Model Routing on One 12 GB GPU (emulating frontier cloud routing between a thinking planner and fast executor locally).
-- **Episode 7 (Goal Project):** 100% Offline Retirement Date Calculator (`NOTEBOOK/RETIREMENT_PLAN.md` + exact Python math engine + private local Qwen analysis).
+- **Episode 7 (Next):** Local Planner / Executor Model Routing on One 12 GB GPU (emulating frontier cloud routing between a thinking planner and fast executor locally).
+- **Episode 8 (Goal Project):** 100% Offline Retirement Date Calculator (`NOTEBOOK/RETIREMENT_PLAN.md` + exact Python math engine + private local Qwen analysis).
