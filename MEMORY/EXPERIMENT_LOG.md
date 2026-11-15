@@ -463,4 +463,39 @@
      - Parity Suite: 4/4 PASSED (Determinism, JSON schema, Python AST, 71.5% MTP draft acceptance over 618 tokens).
 - **Status:** COMPLETE and operational. Qwen 3.8 27B IQ2_M server active at `http://127.0.0.1:8080/v1` with 64k context.
 
+## EXP-026: 64 GB 2-DIMM (2x32 GB) Evaluation Matrix & Architecture Verification
+- **Date / Time:** 2026-11-14T18:12:00-06:00
+- **Target:** Benchmark the full model spectrum (`Qwen 3.8 27B UD-Q4_K_XL`, `Qwen 3.6 35B A3B UD-Q4_K_XL`, and `Qwen 3.8 27B IQ2_M`) following hardware upgrade to 64 GB DDR4-3200 in a 2-DIMM configuration ($2 \times 32\text{ GB}$, 1 DPC, Dual-Channel, 3200 MT/s).
+- **Execution & Telemetry Findings:**
+  1. **Hardware Verification:**
+     - Confirmed via `Win32_PhysicalMemory`: 2 modules of 34,359,738,368 bytes (64 GB total) running at 3200 MT/s.
+     - Available physical RAM at idle: ~60.6 GB free.
+  2. **Qwen 3.8 27B UD-Q4_K_XL (Dense Hybrid Offload: 45 VRAM / 20 DDR4, `benchmark_20261114_180046.md`):**
+     - Overall Median Decode: **5.50 tokens/sec**.
+     - Structured JSON: **6.29 t/s** (MTP accept: 82.3%)
+     - Code Generation: **5.58 t/s** (MTP accept: 66.5%)
+     - Technical Reasoning: **5.39 t/s** (MTP accept: 62.0%)
+     - Smoke Sanity: **4.67 t/s** (MTP accept: 46.9%)
+     - Peak Process RSS: **22,903.1 MB (~22.4 GB)**.
+     - Dual-Rank DIMM Insight: 32 GB modules are dual-rank (2R per DIMM). While dual-channel 1 DPC physical bus integrity is preserved, 2R rank-turnaround latencies slightly moderate the single-thread streaming bandwidth on Zen 3 IMC compared to 1R modules, landing dense hybrid decode in the 5.50–6.29 t/s range with ~38 GB headroom.
+     - Parity Suite: 4/4 PASSED (Determinism, JSON schema, Python AST, 65.3% MTP draft acceptance over 665 tokens).
+  3. **Qwen 3.6 35B A3B UD-Q4_K_XL (Sparse MoE Hybrid Offload: 16 VRAM / 25 DDR4, `benchmark_20261114_180722.md`):**
+     - Overall Median Decode: **16.26 tokens/sec**.
+     - Structured JSON: **16.28 t/s** (TTFT: 126.7 ms)
+     - Code Generation: **16.25 t/s** (TTFT: 1223.6 ms)
+     - Technical Reasoning: **16.27 t/s** (TTFT: 1369.9 ms)
+     - Smoke Sanity: **16.20 t/s** (TTFT: 129.1 ms)
+     - Peak Process RSS: **21,500.2 MB (~21.0 GB)**.
+     - Sparse Invariant: MoE 35B demonstrates ultra-consistent ~16.26 t/s across all prompt types. Over 40 GB of physical RAM remains completely free, eliminating any possibility of disk swapping.
+     - Parity Suite: 4/4 PASSED (Determinism, JSON schema, Python AST, Standalone verification).
+  4. **Qwen 3.8 27B IQ2_M (100% VRAM Saturation Tier: 65/65 GDDR6, `benchmark_20261114_181112.md`):**
+     - Overall Median Decode: **22.26 tokens/sec** (peaking at **24.25–24.76 t/s** on Structured JSON).
+     - Python Code: **23.15 t/s** (69.8% MTP accept, 160.7 ms TTFT)
+     - Technical Reasoning: **21.48 t/s** (61.2% MTP accept, 158.1 ms TTFT)
+     - Smoke Sanity: **21.39 t/s** (60.7% MTP accept, 162.7 ms TTFT)
+     - Peak Process RSS: **12,027.4 MB (~11.7 GB)**.
+     - Silicon Invariant: 100% VRAM saturation delivers identical top-tier performance irrespective of host system RAM capacity.
+     - Parity Suite: 4/4 PASSED (Determinism, JSON schema, Python AST, 71.5% MTP draft acceptance over 618 tokens).
+- **Status:** COMPLETE and operational. Qwen 3.8 27B IQ2_M left active on port 8080 with 64k context.
+
 
