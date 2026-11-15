@@ -4,7 +4,7 @@
 - **GitHub Repository:** https://github.com/6700xtdude-gif/6700XT-Afterburner (`main` branch synced, working tree clean).
 - **Host:** Windows 11 Pro, Ryzen 5 5600 (6C/12T), 64 GB DDR4-3200 (2x32 GB DIMMs; 96 GB 4-DIMM upgrade pending, see `MEMORY/RAM_64gb-2dimm.json`), AMD Radeon RX 6700 XT 12 GB (`Navi 22` / `gfx1031` Vulkan).
 - **Active Phase:** Production Ready & Verified — 100% VRAM Resident 27B Speculative Decoding (`Qwen3.8-27B-IQ2_M` verified at **22.61 t/s median**), 35B MoE Hybrid (**16.78 t/s**), 27B Dense Hybrid (**7.54 t/s**), standardized spec-driven benchmarking (`bench/`), and hermetic testing (`tests/`).
-- **Server Status:** Active at `http://127.0.0.1:8080/v1` running `Qwen3.8-27B-IQ2_M.gguf` (64k context, MTP speculation enabled, 100% VRAM resident).
+- **Server Status:** Configured at `http://127.0.0.1:8080/v1` (`Qwen3.8-27B-IQ2_M.gguf`, 64k context, MTP speculation, 100% VRAM resident). Currently **stopped**; start with `.\start_local_server.ps1 -Mode qwen27b_vram -CtxSize 65536`.
 
 ## Memory System (added 2026-11-15)
 
@@ -17,6 +17,22 @@ Durable state lives in git, not in any harness's chat database.
 - **Hardware change record:** `bench/ram_topology.py` writes `MEMORY/RAM_<label>.json` and compares configs.
 - **Reimage runbook:** `docs/REIMAGE_RUNBOOK.md`.
 - **Vendored-tree rule:** `docs/VENDORED_TREES.md` and `patches/` — local llama.cpp edits are exported, never left dirty.
+
+## Reading Order
+
+A fresh session reads these in order and stops when it has what it needs.
+
+1. `MEMORY/PROTOCOL.md` — the contract
+2. `MEMORY/DIGEST.md` — this file, current state
+3. `MEMORY/GAPS_AND_HYPOTHESES.md` — what is still unknown
+4. `docs/STRATA_EXECUTION_PLAN_2026-11-13.md` — the architecture plan
+5. `docs/PROJECT_9696XT_REPORT.md` — the 96 GB / 2-DIMM efficiency findings
+6. `docs/QWEN38_27B_BOTTLENECK_REPORT.md` — where the 27B path saturates
+7. `docs/REIMAGE_RUNBOOK.md` — OS and hardware change procedure
+8. `docs/VENDORED_TREES.md` — rules for `tools/llama.cpp`
+9. `NOTEBOOK/SYSTEM_BASELINE.md` — verified rig facts
+
+Generated, do not hand-edit: `MEMORY/INDEX.json` (machine catalog), `MEMORY/HEALTH.md` (rot report). Rebuild with `python scripts/memory_build.py`.
 
 ## Current Production Stack
 - **Governance Anchor ([`AGENTS.md`](file:///c:/Users/6700XT/Documents/Strata/AGENTS.md)):**
