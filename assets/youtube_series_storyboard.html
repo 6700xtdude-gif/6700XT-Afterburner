@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased p-0 m-0">
+  <div class="py-2 space-y-3">
+    <!-- Episode Tabs -->
+    <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[var(--card-border)]">
+      <div class="flex flex-wrap gap-1.5" id="tabs">
+        <button data-tab="0" class="tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--primary)] text-[var(--primary-foreground)]">Ep 1: 12GB Sweet Spot</button>
+        <button data-tab="1" class="tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--card-border)]">Ep 2: TPS Lies</button>
+        <button data-tab="2" class="tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--card-border)]">Ep 3: 12-Min Trap</button>
+        <button data-tab="3" class="tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--card-border)]">Ep 4: Don't Upgrade</button>
+        <button data-tab="4" class="tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--card-border)]">Shorts Loop</button>
+      </div>
+      <span class="text-xs text-[var(--muted-foreground)] font-mono">1–3 min / ep</span>
+    </div>
+
+    <!-- Content Stage -->
+    <div id="stage" class="grid grid-cols-1 md:grid-cols-12 gap-3"></div>
+  </div>
+
+  <script>
+    const episodes = [
+      {
+        title: "Ep 1: 12 GB Isn't Dead (Shared Memory Myth)",
+        duration: "2:15",
+        mockupTitle: "Task Manager + Corner Cam",
+        mockupBody: [
+          { label: "Dedicated VRAM", val: "11.8 / 12.0 GB", color: "var(--chart-1)" },
+          { label: "Shared GPU Mem", val: "0.9 / 47.9 GB", color: "var(--chart-2)" },
+          { label: "Compute 0", val: "99% @ 76°C", color: "var(--success)" }
+        ],
+        camNote: "Optional face-cam in bottom-right (you reacting to the 0.9 GB number)",
+        beats: [
+          ["0:00 Hook", "Show 27B model running on RX 6700 XT. Everyone says it won't fit."],
+          ["0:25 What Broke", "Zoom in on Task Manager's 0.9 GB Shared Memory—why people think it spilled to DDR4."],
+          ["1:05 The Fix", "Explain Windows WDDM staging buffers vs. actual 384 GB/s GDDR6 saturation."],
+          ["1:50 Takeaway", "Watch Dedicated vs. Shared side-by-side before buying a new GPU."]
+        ],
+        shortIdea: "Short (45s): 'Why 0.9 GB Shared GPU Memory on a 6700 XT isn't a spill' -> links to Ep 1."
+      },
+      {
+        title: "Ep 2: Tokens/Sec Don't Mean Bunk",
+        duration: "2:30",
+        mockupTitle: "Split Screen: Raw Logs vs. Filtered",
+        mockupBody: [
+          { label: "Raw Get-WinEvent", val: "0% accuracy / 26 calls", color: "var(--error)" },
+          { label: "PS Group-Object", val: "100% accuracy / 5/5", color: "var(--success)" },
+          { label: "Context Flood", val: "30+ XML blocks -> 3 lines", color: "var(--chart-3)" }
+        ],
+        camNote: "Voiceover over terminal + optional intro/outro cam",
+        beats: [
+          ["0:00 Hook", "40 tok/sec means nothing if the model spends 15 min failing a real task."],
+          ["0:30 What Broke", "Show raw Event Log XML flooding the 64k context and looping <think>."],
+          ["1:15 The Fix", "Filter inside PowerShell (Group-Object) + SYSTEM_BASELINE.md."],
+          ["2:05 Takeaway", "Shrink stdout at the source—don't upgrade hardware to brute-force noisy prompts."]
+        ],
+        shortIdea: "Short (40s): 'One PowerShell pipe took our local LLM from 0% to 100% accuracy' -> links to Ep 2."
+      },
+      {
+        title: "Ep 3: The Flag That Added 12 Minutes",
+        duration: "2:00",
+        mockupTitle: "Before / After Benchmark Card",
+        mockupBody: [
+          { label: "--no-reasoning-preserve", val: "33.3 min | 36 turns | 19 errs", color: "var(--error)" },
+          { label: "--reasoning-budget 256", val: "21.0 min | 11 turns | 3 errs", color: "var(--success)" },
+          { label: "Peak Context", val: "44.6k vs 34.7k tokens", color: "var(--warning)" }
+        ],
+        camNote: "Face-cam reaction on 'I broke it trying to be clever'",
+        beats: [
+          ["0:00 Hook", "I tried to outsmart my 6700 XT and made it 12 minutes slower."],
+          ["0:25 What Broke", "Added --no-reasoning-preserve; model got inter-turn amnesia."],
+          ["1:10 The Fix", "Keep thinking preserved with a 256-token budget."],
+          ["1:40 Takeaway", "Always benchmark real multi-turn tasks, not intuition."]
+        ],
+        shortIdea: "Short (35s): 'This 1 server flag gave my local AI short-term memory loss' -> links to Ep 3."
+      },
+      {
+        title: "Ep 4: Use What You Have (No $2k GPU Needed)",
+        duration: "2:45",
+        mockupTitle: "Hardware Spectrum Visual",
+        mockupBody: [
+          { label: "ESP32 / Meshtastic / Watch", val: "Tiny neural nets today", color: "var(--chart-4)" },
+          { label: "Raspberry Pi / Old PC", val: "Small specialized models", color: "var(--chart-2)" },
+          { label: "RX 6700 XT (12 GB)", val: "27B–35B MoE workhorse", color: "var(--success)" }
+        ],
+        camNote: "Desk shot / face-cam talking directly to viewer",
+        beats: [
+          ["0:00 Hook", "Hardware prices are nuts, and we didn't ask for this."],
+          ["0:35 Reality Check", "Don't risk money chasing an unknown tech—software catches up to your rig."],
+          ["1:20 Proof", "From ESP32 Meshtastic & Pis to a 5-year-old 6700 XT, tools already run locally."],
+          ["2:15 Takeaway", "Master the tools on your desk today; you can only game so many hours a day."]
+        ],
+        shortIdea: "Short (50s): 'Stop upgrading your GPU for AI—here is what already runs on your desk' -> links to Ep 1."
+      },
+      {
+        title: "Cyclical Shorts Loop (How Shorts Feed the Series)",
+        duration: "Ongoing",
+        mockupTitle: "3-Step Viewer Loop",
+        mockupBody: [
+          { label: "1. Standalone Short (<60s)", val: "1 visual hook (e.g. 0.9 GB Shared)", color: "var(--chart-1)" },
+          { label: "2. Pinned Link -> Ep 1–4", val: "'Full 2-min breakdown here'", color: "var(--primary)" },
+          { label: "3. Ep 4 -> Back to Ep 1", val: "Series playlist loops viewers", color: "var(--success)" }
+        ],
+        camNote: "Vertical 9:16 crop of your screen recording + optional cam bubble",
+        beats: [
+          ["Clip 1 (from Ep 1)", "Task Manager zoom-in: 'Is your 12GB card actually spilling to RAM?'"],
+          ["Clip 2 (from Ep 2)", "Terminal side-by-side: 'Why your local AI is slow (it's not TPS).'"],
+          ["Clip 3 (from Ep 3)", "Benchmark numbers: '1 flag added 12 minutes to my run.'"],
+          ["Clip 4 (from Ep 4)", "Desk shot: 'Why you shouldn't buy a new GPU right now.'"]
+        ],
+        shortIdea: "Each Short is cut from the same screen capture—zero extra recording needed."
+      }
+    ];
+
+    const tabs = document.querySelectorAll('.tab-btn');
+    const stage = document.getElementById('stage');
+
+    function render(idx) {
+      tabs.forEach((b, i) => {
+        if (i === idx) {
+          b.className = "tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--primary)] text-[var(--primary-foreground)]";
+        } else {
+          b.className = "tab-btn px-2.5 py-1 rounded text-xs font-medium bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--card-border)]";
+        }
+      });
+
+      const ep = episodes[idx];
+      stage.innerHTML = `
+        <div class="md:col-span-5 bg-[var(--card)] border border-[var(--card-border)] rounded-lg p-3 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-[var(--foreground)]">${ep.mockupTitle}</span>
+            <span class="text-xs font-mono text-[var(--muted-foreground)]">${ep.duration}</span>
+          </div>
+          <div class="space-y-1.5">
+            ${ep.mockupBody.map(row => `
+              <div class="flex items-center justify-between text-xs bg-[var(--background)] border border-[var(--card-border)] rounded px-2 py-1.5">
+                <span class="text-[var(--muted-foreground)]">${row.label}</span>
+                <span class="font-mono font-medium" style="color: ${row.color}">${row.val}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="text-xs text-[var(--muted-foreground)] border-t border-[var(--card-border)] pt-2">
+            <span class="font-medium text-[var(--foreground)]">Camera:</span> ${ep.camNote}
+          </div>
+        </div>
+        <div class="md:col-span-7 bg-[var(--card)] border border-[var(--card-border)] rounded-lg p-3 space-y-2">
+          <div class="text-xs font-semibold text-[var(--foreground)]">${ep.title}</div>
+          <div class="space-y-1.5">
+            ${ep.beats.map(([time, desc]) => `
+              <div class="flex gap-2 text-xs">
+                <span class="font-mono text-[var(--primary)] shrink-0 w-24">${time}</span>
+                <span class="text-[var(--foreground)]">${desc}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="text-xs bg-[var(--background)] border border-[var(--card-border)] rounded px-2 py-1.5 text-[var(--muted-foreground)]">
+            <span class="font-medium text-[var(--foreground)]">Cyclical Short:</span> ${ep.shortIdea}
+          </div>
+        </div>
+      `;
+    }
+
+    tabs.forEach(btn => btn.addEventListener('click', () => render(Number(btn.dataset.tab))));
+    render(0);
+  </script>
+</body>
+</html>
