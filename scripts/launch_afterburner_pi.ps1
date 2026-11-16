@@ -1,7 +1,7 @@
 ﻿# scripts/launch_afterburner_pi.ps1 - Single-click seamless launcher for AfterBurner + Pi
 $ErrorActionPreference = "Continue"
 
-$rootDir = "C:\Users\6700XT\Documents\Strata"
+$rootDir = "C:\Users\6700XT\6700XT-Afterburner"
 Set-Location $rootDir
 
 # Ensure Pi and Node are in PATH for current session

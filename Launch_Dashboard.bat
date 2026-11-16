@@ -1,11 +1,11 @@
 @echo off
 title AfterBurner Control Center Launcher
-cd /d "C:\Users\6700XT\Documents\Strata"
+cd /d "C:\Users\6700XT\6700XT-Afterburner"
 
-netstat -ano | findstr "127.0.0.1:8090" | findstr "LISTENING" >nul 2>&1
+netstat -ano | findstr "127.0.0.1:3333" | findstr "LISTENING" >nul 2>&1
 if errorlevel 1 (
-    start "AfterBurner Control Center" /min python "C:\Users\6700XT\Documents\Strata\dashboard\server.py"
+    start "AfterBurner Control Center" /min "C:\Program Files\nodejs\node.exe" "C:\Users\6700XT\.gemini\antigravity\scratch\dashboard\server.js"
     timeout /t 2 /nobreak >nul
 )
 
-start "" "http://127.0.0.1:8090"
+start "" "http://127.0.0.1:3333"
