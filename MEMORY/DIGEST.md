@@ -25,9 +25,9 @@ Durable state lives in git, not in any harness's chat database.
 - **llama.cpp Engine:** Vulkan x64 b12427 running `qwen2.5-coder-7b` on `http://127.0.0.1:8080` (33.2 t/s benchmarked).
 - **Web Dashboard:** Operational at `http://localhost:3333` with live hardware telemetry, Unload VRAM button, Advanced Settings modal (with Seed randomizer & incrementer), and GitHub benchmark exporter.
 - **Model Download Pipeline:**
-  1. `DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf` (in progress, ~78%).
-  2. `Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf` (queued).
-  3. `Qwen2.5-14B-Instruct-Q4_K_M.gguf` (queued).
+  1. `DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf` (4.68 GB - Download Complete, Loaded on 8080, 72.3 t/s generation).
+  2. `Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf` (4.92 GB - Download Complete).
+  3. `Qwen2.5-14B-Instruct-Q4_K_M.gguf` (8.99 GB - In Progress).
 
 ## Next Actions
 1. **Model Evaluation & Benchmark:** Benchmark DeepSeek-R1 Distill 7B reasoning traces and publish results to GitHub benchmark ledger.
