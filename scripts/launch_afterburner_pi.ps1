@@ -5,7 +5,7 @@ $rootDir = "C:\Users\6700XT\6700XT-Afterburner"
 Set-Location $rootDir
 
 # Ensure Pi and Node are in PATH for current session
-$env:PATH = "$env:LOCALAPPDATA\pi-node\current;$env:USERPROFILE\.pi\agent\bin;$env:PATH"
+$env:PATH = "C:\Program Files\nodejs;$env:USERPROFILE\.pi\agent\bin;$env:PATH"
 
 $Host.UI.RawUI.WindowTitle = "6700XT AfterBurner Pi Agent"
 Write-Host "==========================================================" -ForegroundColor Cyan
