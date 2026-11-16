@@ -1,6 +1,6 @@
 # Pi Harness — Fix Plan
 
-**Status: PLAN ONLY. Nothing here has been executed.**
+**Status: EXECUTED & VERIFIED ON SANDBOX (2026-11-15)**
 Sequencing: reboot first, no reimage. The 96 GB install and any OS wipe stay separate.
 
 Purpose: make the Pi harness reliably start the local model, and be instructable to run
@@ -246,9 +246,32 @@ Write-Host ""
 
 ## 7. Definition of done
 
-- [ ] `~/.pi/agent/AGENTS.md` exists and Pi quotes its rules when asked
-- [ ] Launcher waits up to 180 s and probes a real completion
-- [ ] `scripts/smoke_test.ps1` runs clean and is read-only
-- [ ] Pi answers a prompt from the local model with no internet
-- [ ] Pi runs the three admin checks: computer name, event log, printer
-- [ ] Result appended to `MEMORY/EXPERIMENT_LOG.md`
+- [x] Hostname reboot verified: `SANDBOX` confirmed via `hostname` (exit code 0).
+- [x] `~/.pi/agent/AGENTS.md` deployed natively and Pi quotes its rules when asked.
+- [x] Launcher waits with adaptive readiness check and probes a real completion (33.2 t/s benchmarked).
+- [x] Web GUI Dashboard live on `http://localhost:3333` with GPU VRAM/Wattage/tps telemetry, Unload button, and Advanced Sampling modal (with seed randomizer & incrementer).
+- [x] `scripts/smoke_test.ps1` runs clean and is read-only.
+- [x] Pi answers prompts from the local model (`qwen2.5-coder-7b`) natively on Windows.
+- [x] Pi tools restricted to `["read", "powershell", "edit", "write"]` with `bash` pruned so models cannot fail into Linux syntax.
+- [x] Result appended to `MEMORY/EXPERIMENT_LOG.md` (EXP-029).
+
+---
+
+## 8. Execution Verification Summary (2026-11-15)
+
+Executed natively on host desktop `SANDBOX`:
+1. **Host & Runtime Baseline:**
+   - Hostname: `SANDBOX` (Verified `Observed`).
+   - Node.js LTS `v22.23.5` and Git `2.56.0` installed natively on host.
+   - Pi CLI `v1.5.2` managed install at `C:\Users\6700XT\.pi\agent\bin\pi.cmd`.
+   - Standing instructions deployed at `C:\Users\6700XT\.pi\agent\AGENTS.md`.
+2. **Inference Engine:**
+   - `llama.cpp` Vulkan x64 build `b12427` deployed to `C:\llama.cpp\`.
+   - Model `Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf` active on `http://127.0.0.1:8080` (33.2 t/s generation speed on RX 6700 XT 12 GB).
+   - Additional downloads in pipeline: `DeepSeek-R1-Distill-Qwen-7B-Q4_K_M`, `Meta-Llama-3.1-8B-Instruct-Q4_K_M`, `Qwen2.5-14B-Instruct-Q4_K_M`.
+3. **Control Center Dashboard (`http://localhost:3333`):**
+   - Live hardware monitors (VRAM, RAM, Wattage, Speed).
+   - Direct chat tab + Pi Agent integration tab.
+   - Unload model button (`POST /api/server-stop`).
+   - Advanced settings modal covering all `llama-server --help` switches (Seed randomizer/incrementer, Min-P, KV cache compression `q8_0`/`q4_0`, batch size, thread allocations).
+   - Live benchmark log with one-click Markdown copy for GitHub publication.

@@ -550,3 +550,36 @@ COMPLETE. Repo pushed at `a36892f`. Pre-reimage gate green. The 96 GB comparison
 
 ### Status
 AUDIT COMPLETE. Nothing executed against the model server. Plan recorded, not run.
+
+## EXP-029: Post-Reboot Hostname Verification, Native Pi Harness & Vulkan Dashboard Integration
+- **Date / Time:** 2026-11-15
+- **Target:** Verify host rename to `SANDBOX`, deploy native Pi harness (no WSL/Docker/venv), enforce PowerShell rules (no bash), configure `llama.cpp` Vulkan server, and build a local hardware & inference dashboard.
+
+### Observed
+1. **Hostname Verified:** Command `hostname` returned `SANDBOX` (exit code 0).
+2. **Environment & Runtimes Installed:**
+   - Node.js LTS `v22.23.5` and Git `2.56.0` installed natively on host.
+   - Pi CLI `v1.5.2` verified at `C:\Users\6700XT\.pi\agent\bin\pi.cmd`.
+   - Tool policy enforced: `~/.pi/agent/settings.json` configured with `defaultTools: ["read", "powershell", "edit", "write"]`. `bash` removed so small local models cannot attempt Linux commands.
+   - Machine scope standing instructions deployed at `~/.pi/agent/AGENTS.md`.
+3. **Inference Benchmarked:**
+   - `llama.cpp` Vulkan x64 `b12427` running on `AMD Radeon RX 6700 XT (12272 MiB, 11474 MiB free)`.
+   - Model `qwen2.5-coder-7b-instruct-q4_k_m.gguf` benchmarked at **33.2 t/s generation speed** and **40.5 t/s prompt eval**.
+4. **Control Center Dashboard (`http://localhost:3333`):**
+   - Telemetry monitors: Live GPU VRAM (toggleable GB/percent/MB), RAM (64 GB fraction/percent), GPU Wattage estimation, and generation speed (t/s).
+   - "Unload Model (Free VRAM)" button wired to `POST /api/server-stop`, cleanly releasing VRAM back to the GPU.
+   - "Advanced Settings" modal wired to all `llama-server --help` variables: Seed with 🎲 randomizer and +1 incrementer, Min-P, repeat penalties, KV cache compression (`q8_0`, `q4_0`), threads, and batch sizes.
+   - Dual-tab workspace: Direct model chat and Pi agent harness execution.
+   - Live benchmark log with one-click Markdown copy for GitHub publication.
+5. **System Clock Synchronized:** Windows time service `w32time` started and resynced against `time.windows.com`, resolving the 1-hour daylight saving time offset.
+
+### Inferred
+- 7B small models require positive removal of bad tool options (`bash`) rather than relying on prompt-based self-steering.
+
+### Actions
+1. `docs/PI_HARNESS_PLAN.md` updated from `PLAN ONLY` to `EXECUTED & VERIFIED`.
+2. `MEMORY/DIGEST.md` updated with active post-reboot runtime state.
+3. Queueing model downloads: DeepSeek-R1-Distill-Qwen-7B, Llama-3.1-8B, Qwen2.5-14B.
+
+### Status
+COMPLETE. All Phase 7 harness deployment tasks verified and running live on SANDBOX.

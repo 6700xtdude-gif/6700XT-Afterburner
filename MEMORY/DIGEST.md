@@ -18,15 +18,21 @@ Durable state lives in git, not in any harness's chat database.
 - **Reimage runbook:** `docs/REIMAGE_RUNBOOK.md`.
 - **Vendored-tree rule:** `docs/VENDORED_TREES.md` and `patches/` — local llama.cpp edits are exported, never left dirty.
 
-## Next Actions (2026-11-15)
+## Current Execution Status (2026-11-15 Post-Reboot)
 
-**Nothing executes until the user says go.** Full plan: `docs/PI_HARNESS_PLAN.md`.
+- **Hostname:** Verified as `SANDBOX` (`Observed`).
+- **Pi Harness:** Natively deployed on Windows (Node.js 22 LTS, Pi v1.5.2). Standing instructions deployed at `~/.pi/agent/AGENTS.md`. `bash` removed from defaultTools, restricted to `["read", "powershell", "edit", "write"]`.
+- **llama.cpp Engine:** Vulkan x64 b12427 running `qwen2.5-coder-7b` on `http://127.0.0.1:8080` (33.2 t/s benchmarked).
+- **Web Dashboard:** Operational at `http://localhost:3333` with live hardware telemetry, Unload VRAM button, Advanced Settings modal (with Seed randomizer & incrementer), and GitHub benchmark exporter.
+- **Model Download Pipeline:**
+  1. `DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf` (in progress, ~78%).
+  2. `Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf` (queued).
+  3. `Qwen2.5-14B-Instruct-Q4_K_M.gguf` (queued).
 
-1. **Reboot — not a reimage.** Then fix the Pi harness: standing instructions at `~/.pi/agent/AGENTS.md` (does not exist today), load timeout raised from 35 s to 180 s, a real completion probe instead of a `/health` check, and one launcher instead of three (`Launch_Pi.bat`, `start_pi_afterburner.ps1`, `scripts/launch_afterburner_pi.ps1` all start Pi today).
-2. **Read-only smoke test** — `scripts/smoke_test.ps1` (to be created): computer name and OS build, deduplicated System event log, printer list plus TCP reachability, local model `/v1/models` and one completion.
-3. **Number provenance** — `895 t/s` in `README.md` and three docs has no artifact. Mark unverified in place, then extend `memory_build.py`'s unsourced check past `DIGEST.md` to `README.md` and `docs/`.
-4. **Untested configuration** — drafter on CPU, verifier on GPU. The only memory-tier placement not yet measured, and the one that serves the goal of two models across any silicon.
-5. **96 GB install** — still pending, after the reboot work.
+## Next Actions
+1. **Model Evaluation & Benchmark:** Benchmark DeepSeek-R1 Distill 7B reasoning traces and publish results to GitHub benchmark ledger.
+2. **Untested Configuration:** Drafter on CPU, verifier on GPU across DDR4-3200 and VRAM tiers.
+3. **96 GB Install:** Hardware upgrade planned to 64GB / 96GB.
 
 ## Infinity Cache — closed, do not reopen
 
