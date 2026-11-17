@@ -1,5 +1,8 @@
 # 6700XT-Afterburner 🚀
 
+> [!NOTE]
+> **Community & Transparency Disclaimer:** This repository, documentation, and benchmark suite were compiled and posted with AI assistance. The author (`6700XT`) is actively learning AI architecture, hardware limits, and local LLM benchmarking. Please take all data, theories, and conclusions with a grain of salt. As empirical validation and domain confidence grow, this notice will be updated.
+
 **Dual-Engine Speculative Decoding & Hardware Reality Audit for the AMD Radeon RX 6700 XT (`Navi 22` / `gfx1031` Vulkan)**
 
 > **Core Mission:** Overcome the 192-bit GDDR6 memory bus bottleneck (~384 GB/s) on the 12 GB AMD Radeon RX 6700 XT by pairing a 100% VRAM-resident **Qwen 2.5 Coder 7B (`Q4_K_M`)** verifier with an ultra-fast **0.5B (`Q4_0`)** stock draft engine—and auditing sub-90 MB L3-resident model surgery inside Navi 22's **96 MB Infinity Cache** (>1 TB/s SRAM) as a rigorous negative result.
