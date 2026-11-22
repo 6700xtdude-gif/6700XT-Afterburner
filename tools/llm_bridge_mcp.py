@@ -10,10 +10,34 @@ import os
 import json
 import urllib.request
 import urllib.error
+from pathlib import Path
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_OPENROUTER_MODEL = "openrouter/auto"
 DEFAULT_LOCAL_URL = os.environ.get("LOCAL_LLM_URL", "http://127.0.0.1:8080/v1")
+LOCAL_TOKEN_LOG = os.environ.get(
+    "LOCAL_TOKEN_LOG",
+    str(Path.home() / ".gemini" / "antigravity" / "scratch" / "endo" / "MEMORY" / "local_token_log.jsonl"),
+)
+
+
+def log_usage(caller, usage):
+    """Append local token usage to the savings audit log."""
+    try:
+        import datetime
+        entry = {
+            "ts": datetime.datetime.now().isoformat(),
+            "model": "granite-4.0-h-tiny-q6_k (local)",
+            "caller": caller,
+            "prompt_tokens": int((usage or {}).get("prompt_tokens", 0) or 0),
+            "completion_tokens": int((usage or {}).get("completion_tokens", 0) or 0),
+            "total_tokens": int((usage or {}).get("total_tokens", 0) or 0),
+        }
+        os.makedirs(os.path.dirname(LOCAL_TOKEN_LOG), exist_ok=True)
+        with open(LOCAL_TOKEN_LOG, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry) + "\n")
+    except Exception:
+        pass
 
 def log(msg):
     sys.stderr.write(f"[llm-bridge] {msg}\n")
@@ -83,6 +107,7 @@ def call_local_llm(prompt: str, system_prompt: str = None, temperature: float = 
             msg = data["choices"][0]["message"]
             content = msg.get("content") or ""
             reasoning = msg.get("reasoning_content") or ""
+            log_usage("llm_bridge_mcp (Antigravity)", data.get("usage", {}))
             if reasoning and content:
                 return f"<think>\n{reasoning.strip()}\n</think>\n\n{content.strip()}"
             elif reasoning and not content:
@@ -106,6 +131,27 @@ def check_local_status() -> str:
             return f"Local LLM Server Online at {DEFAULT_LOCAL_URL}. Loaded models: {', '.join(models) if models else 'default'}"
     except Exception as e:
         return f"Local LLM Server Offline ({endpoint}): {str(e)}"
+
+
+def call_live_memory(query: str, k: int = 6, use_embeddings: bool = False) -> str:
+    """Run live_memory.py and return its output (retrieval + grounded answer)."""
+    import subprocess
+    script = os.environ.get(
+        "LIVE_MEMORY_SCRIPT",
+        str(Path.home() / ".gemini" / "antigravity" / "scratch" / "endo" / "SCRIPTS" / "live_memory.py"),
+    )
+    cmd = [sys.executable, script, query, "--k", str(k)]
+    if use_embeddings:
+        cmd.append("--embed")
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=180, encoding="utf-8", errors="replace")
+        out = (res.stdout or "").strip()
+        err = (res.stderr or "").strip()
+        if res.returncode != 0:
+            return f"live_memory error (exit {res.returncode}): {err or out}"
+        return out if out else (err or "(no output)")
+    except Exception as e:
+        return f"live_memory error: {str(e)}"
 
 TOOLS = [
     {
@@ -142,9 +188,21 @@ TOOLS = [
             "type": "object",
             "properties": {}
         }
+    },
+    {
+        "name": "live_memory_query",
+        "description": "Query the local ENDO knowledge-base memory (1857 normalized records) and get a grounded answer from the local Granite LLM. Retrieval + generation run entirely on-prem (zero cloud tokens). Use for fast history/context lookup instead of stuffing everything into the prompt.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "The question or search query."},
+                "k": {"type": "integer", "description": "Number of records to retrieve (default 6)."},
+                "use_embeddings": {"type": "boolean", "description": "Re-rank with RX 570 embeddings for semantic search (default false)."}
+            },
+            "required": ["query"]
+        }
     }
 ]
-
 def handle_message(msg):
     method = msg.get("method")
     req_id = msg.get("id")
@@ -194,6 +252,11 @@ def handle_message(msg):
             result_text = call_local_llm(prompt, sys_p, temp)
         elif tool_name == "local_llm_status":
             result_text = check_local_status()
+        elif tool_name == "live_memory_query":
+            query = args.get("query", "")
+            k = int(args.get("k", 6) or 6)
+            use_emb = bool(args.get("use_embeddings", False))
+            result_text = call_live_memory(query, k, use_emb)
         else:
             result_text = f"Unknown tool: {tool_name}"
 

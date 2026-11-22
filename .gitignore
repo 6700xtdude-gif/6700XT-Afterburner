@@ -11,6 +11,7 @@ packs/
 # Compiled Binaries & Submodules
 bin/
 tools/llama.cpp/
+installer/dist/
 *.exe
 *.dll
 *.zip
